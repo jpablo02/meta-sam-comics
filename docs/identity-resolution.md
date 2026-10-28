@@ -106,3 +106,48 @@ Muse Image       reveals that object as the collectible, from the real crop
 
 Each model is asked the question it is good at. The one nobody is good at —
 "is this the same thing in the story?" — is the one that needed the context.
+
+---
+
+## Revision: the script is the reference, not the previous crop
+
+The design above held on the original chapter and broke on the first chapter
+Muse Image drew for us — one with more paperwork in it. Two failures, measured:
+
+**SAM returns one instance per phrase.** It answers a text prompt with the
+single match it rates best. `"white paper document"` picked papers on Wesley's
+desk in panel 1 and a note under Zully's phone in panel 2 — the report in her
+hands was never a candidate. Same in image mode. The phrase is what selects the
+instance: `"paper held in hands"` found the report in both panels where
+`"sheet of paper"` found background clutter.
+
+**Chained comparison over-merges.** Told that panel-to-panel differences are
+expected, Muse Wonder merged all three papers at 0.84 and 0.90: *"the report
+went from lying on the table to being held"*. Plausible, and false. Fixing the
+false *no* had produced a false *yes*, because the model was never told where
+the object is or that other papers exist.
+
+The fix uses what the app always has: the script says what the object is, who
+handles it, and which panels it is planted in. So each planted panel goes
+through three steps:
+
+```
+Muse Wonder   reads the scene + the panel, writes the phrase that singles the
+              object out ("paper held in hands", "P256 Flaw Report document")
+SAM 3.1       segments that phrase to the pixel
+Muse Wonder   checks the crop against the script — the object, or other clutter?
+              on a miss, proposes a new phrase (up to 3 tries)
+```
+
+Result on that chapter, with panel 1 as a negative control:
+
+```
+panel 1: NOT FOUND                                    (desk papers rejected)
+panel 2: FOUND via "P256 Flaw Report document" @ 0.98
+panel 3: FOUND via "crumpled paper held in hands" @ 0.98
+```
+
+Known limit: in panel 3 SAM segmented the crumpled part in Zully's hand and
+left the printed heading above it out of the crop. Right object, partial mask.
+The collectible is revealed from the best sighting (panel 2, the whole sheet),
+so it does not reach the reader.

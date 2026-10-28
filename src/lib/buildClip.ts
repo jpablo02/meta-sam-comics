@@ -29,8 +29,18 @@ const execFileAsync = promisify(execFile);
 /** Frames each panel is held for. 15 at 15fps = one second per panel. */
 export const FRAMES_PER_PANEL = 15;
 
-/** The clip's canvas. Panels are letterboxed onto it, never stretched. */
-export const CLIP_SIZE = 1024;
+/**
+ * The clip takes the FIRST panel's size. Panels drawn by this app are all the
+ * same 9:16, so nothing is letterboxed and SAM's boxes land on panel pixels
+ * directly. Panels of other shapes (an imported chapter) are still letterboxed
+ * onto it, never stretched — cropObject undoes that either way.
+ */
+async function clipCanvas(firstPanel: string): Promise<{ width: number; height: number }> {
+  const meta = await sharp(firstPanel).metadata();
+  if (!meta.width || !meta.height) throw new Error(`Cannot read dimensions of ${firstPanel}`);
+  // H.264 with yuv420p needs even dimensions.
+  return { width: meta.width - (meta.width % 2), height: meta.height - (meta.height % 2) };
+}
 
 export interface ClipResult {
   /** Absolute path of the MP4. */
@@ -52,12 +62,14 @@ export async function buildClip(panelPaths: string[], workDir: string): Promise<
   await rm(seqDir, { recursive: true, force: true });
   await mkdir(seqDir, { recursive: true });
 
-  // Letterbox each panel onto the shared canvas, then hold it for N frames.
+  const canvas = await clipCanvas(panelPaths[0]);
+
+  // Fit each panel onto the shared canvas, then hold it for N frames.
   let frame = 0;
   for (const panelPath of panelPaths) {
     const normalized = join(workDir, `norm-${frame}.png`);
     await sharp(panelPath)
-      .resize(CLIP_SIZE, CLIP_SIZE, { fit: "contain", background: { r: 0, g: 0, b: 0 } })
+      .resize(canvas.width, canvas.height, { fit: "contain", background: { r: 0, g: 0, b: 0 } })
       .toFile(normalized);
 
     for (let held = 0; held < FRAMES_PER_PANEL; held++) {
