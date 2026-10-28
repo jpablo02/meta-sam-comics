@@ -24,9 +24,9 @@ function configuredProviders(): NextAuthOptions["providers"] {
       FacebookProvider({
         clientId: process.env.FACEBOOK_CLIENT_ID,
         clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-        // public_profile + email are standard access: available in Live mode
-        // without App Review. Nothing that needs review is requested.
-        authorization: { params: { scope: "public_profile,email" } },
+        // public_profile only: name and photo are all a comic and a collection
+        // need. email would add a data-handling review to going Live.
+        authorization: { params: { scope: "public_profile" } },
       }),
     );
   }
