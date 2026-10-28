@@ -15,7 +15,6 @@ import { cropFromPanel } from "../src/lib/cropObject";
 import { resolveObjects, primaryObject, labelOf, bestAppearance } from "../src/lib/resolveIdentity";
 import { writeContents } from "../src/lib/writeContents";
 import { revealObject } from "../src/lib/revealObject";
-import { composeContents } from "../src/lib/composeContents";
 
 const PROMPT = "white paper document";
 
@@ -68,13 +67,10 @@ async function main() {
       "and burnt, dramatic rim lighting",
   });
 
-  console.log("7. compose");
-  const teaserPath = join(work, "collectible-teaser.png");
-  const revealedPath = join(work, "collectible-revealed.png");
-  await composeContents(artwork, teaserPath, { title: contents.title, lines: contents.teaser });
-  await composeContents(artwork, revealedPath, { title: contents.title, lines: contents.revealed });
 
-  console.log(`\nDONE\n  ${teaserPath}\n  ${revealedPath}`);
+  console.log(`
+DONE
+  ${artwork}`);
   console.log(`\nforeshadow: ${contents.foreshadow}`);
 }
 
