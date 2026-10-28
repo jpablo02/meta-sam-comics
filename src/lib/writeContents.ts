@@ -34,7 +34,7 @@ export interface ObjectContents {
   foreshadow: string;
 }
 
-function buildPrompt(chapter: Chapter, objectLabel: string, changes: string): string {
+function buildPrompt(chapter: Chapter, objectLabel: string, changes: string, secret: string): string {
   return [
     `You are writing the contents of an object from a comic: the "${chapter.secretObjectName}".`,
     "",
@@ -45,25 +45,34 @@ function buildPrompt(chapter: Chapter, objectLabel: string, changes: string): st
     "",
     `In the artwork the object appears as: ${objectLabel}. The chapter deliberately shows it`,
     "without letting the reader read it. Your job is to write what it says.",
+    secret
+      ? `The script already decided what the object holds — this is canon, build on it, do not contradict it: "${secret}"`
+      : "",
+    "",
+    "Write it in the form the object really has: a report has a title and findings, a love",
+    "engraving has a dedication, a ticket has printed fields plus handwriting, a letter has a",
+    "greeting and a signature. Write as the object, not about it. No commentary.",
     "",
     "Write TWO versions:",
     "",
-    "1. TEASER — what any reader can see on the page. Legible and real, but it stops short:",
-    "   headings, a classification line, the first line of a finding. Enough to prove the",
-    "   document is genuine, not enough to be worth owning. 3 to 5 short lines.",
+    "1. TEASER — what any reader could make out: legible and real, but it stops short — the",
+    "   first words, a fragment. Enough to prove there is a message, not enough to be worth",
+    "   owning. 2 to 4 short lines.",
     "",
-    "2. REVEALED — what someone who collects this object gets to read. The substance the",
-    "   chapter withheld: the actual finding, in the voice of whoever wrote the document.",
-    "   It must be consistent with everything above. 5 to 8 short lines.",
+    "2. REVEALED — what someone who collects this object gets to read: the whole of what the",
+    "   chapter withheld, consistent with everything above. 4 to 8 short lines, each one the",
+    "   way it is physically laid out on the object (line breaks where the object breaks them).",
     "",
     "The REVEALED version must contain one concrete detail that the chapter has NOT shown —",
     "something that sets up what happens next in the series. Not a summary of what readers",
     "already saw. Whoever reads this knows something other readers do not.",
     "",
-    "Stay in the world of the story. Write as the document, not about it. No commentary.",
+    '"title" is ONLY a heading the real object has printed on it (a report title, a company',
+    'name on a ticket). An engraving, a note or a letter has none: leave it "". Never invent a',
+    "label that describes the object.",
     "",
     "Answer with strict JSON only:",
-    '{"title": "the heading printed on the object",',
+    '{"title": "printed heading, or empty",',
     ' "teaser": ["line", "line", "line"],',
     ' "revealed": ["line", "line", "line", "line", "line"],',
     ' "foreshadow": "one sentence naming what this sets up"}',
@@ -109,10 +118,12 @@ export async function writeContents(
   chapter: Chapter,
   objectLabel: string,
   changes = "",
+  /** The script's secretContent. When given, the REVEALED text must carry it. */
+  secret = "",
 ): Promise<ObjectContents> {
   const completion = await metaClient().chat.completions.create({
     model: MUSE_SPARK_MODEL,
-    messages: [{ role: "user", content: buildPrompt(chapter, objectLabel, changes) }],
+    messages: [{ role: "user", content: buildPrompt(chapter, objectLabel, changes, secret) }],
   });
 
   const text = completion.choices[0]?.message?.content;
