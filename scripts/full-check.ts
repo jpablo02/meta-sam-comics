@@ -15,7 +15,6 @@ import { cropFromPanel } from "../src/lib/cropObject";
 import { resolveObjects, primaryObject, labelOf, bestAppearance } from "../src/lib/resolveIdentity";
 import { writeContents } from "../src/lib/writeContents";
 import { revealObject } from "../src/lib/revealObject";
-import { composeContents } from "../src/lib/composeContents";
 
 const PROMPT = "white paper document";
 
