@@ -29,7 +29,7 @@ export const DEFAULT_ART_STYLE =
   "semi-realistic digital painting, detailed rendering, soft cinematic lighting, rich color palette, painterly comic style";
 
 export interface ScriptScene extends PanelScene {
-  /** What happens, in the user's language — they read this. */
+  /** What happens, in English, for the reader-facing UI. */
   description: string;
   /** English, short: drawn in the speech bubble. */
   dialogue: string;
@@ -91,10 +91,13 @@ lives INSIDE the plot; what it says or holds is revealed only to whoever collect
 SEQUENCE: the ${PANEL_COUNT} panels tell one causal story — panel 1 sets up, 2 and 3 complicate,
 4 lands the ending. Each panel happens AFTER the previous one and BECAUSE of it.
 
-LANGUAGE:
-- "description": the reader's language (they read it).
-- Everything else — titles, logline, synopsis, traits, locations, imagePrompt, dialogue,
-  object fields — in English.
+LANGUAGE: the idea may be written in any language (often Spanish). EVERYTHING you write is in
+English — titles, descriptions, traits, locations, imagePrompt, dialogue, every object field.
+Translate names of things, never the names of people.
+
+"dialogue" names who speaks, and separates speakers with " | ":
+"Camila: Look what the net brought! | Ramiro: No... I know that bottle." Short lines — each one
+fits a speech bubble. Leave it empty for a silent panel.
 
 "imagePrompt" describes ONLY action, camera angle, lighting and mood. Name characters, never
 describe how they look (that is injected from "traits"). Name the location in "location";

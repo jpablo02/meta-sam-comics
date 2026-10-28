@@ -6,6 +6,8 @@
  *        ─ Muse Image ──▶ 4 vertical panels, each anchored on the portraits in it
  *        ─ Muse Wonder + SAM 3.1 ──▶ the object, found in every panel the script plants it
  *        ─ Muse Wonder ──▶ its name as drawn, and what happened to it
+ *        ─ Muse Wonder + SAM 3.1 ──▶ speech bubbles: every speaker's face found, the
+ *                                    dialogue placed around faces and the object
  *        ─ Muse Spark ──▶ what it says: a teaser, and the revealed text
  *        ─ Muse Image ──▶ the collectible: teaser card + revealed card
  *        ─ (local) ─────▶ the reel: the chapter with the object in a spotlight
@@ -22,12 +24,14 @@ import { locateInPanel, describeJourney, type Sighting, type Journey } from "./l
 import { writeContents, type ObjectContents } from "./writeContents";
 import { revealTeaser, revealContents } from "./revealObject";
 import { buildReel } from "./buildReel";
+import { bakeBubbles, type Box } from "./bubbles";
 
 export type Step =
   | "script"
   | "portraits"
   | "panels"
   | "object"
+  | "dialogue"
   | "contents"
   | "collectible"
   | "reel"
@@ -36,7 +40,10 @@ export type Step =
 export interface ComicResult {
   script: ComicScript;
   portraits: Record<string, string>;
+  /** Wordless art, as drawn. SAM reads these. */
   panels: string[];
+  /** The same panels with their dialogue baked in. Readers see these. */
+  lettered: string[];
   /** How each panel was drawn — "no-references" means its faces were not anchored. */
   panelRungs: PanelRung[];
   sightings: Sighting[];
@@ -100,6 +107,27 @@ export async function runComic(idea: string, workDir: string, options: RunOption
   }
   const journey = await describeJourney(sightings, object);
 
+  // Dialogue goes on AFTER the object is found: SAM must read the wordless art,
+  // and the bubbles must know where the object is so they never cover it.
+  const lettered: string[] = [];
+  for (const scene of script.scenes) {
+    step("dialogue", `${scene.panelNumber}/${script.scenes.length}`);
+    const n = scene.panelNumber;
+    const raw = panels[n - 1];
+    const avoid: Box[] = [];
+    const sighting = sightings.find((s) => s.panelNumber === n);
+    if (sighting) {
+      const { width = 0, height = 0 } = await sharp(raw).metadata();
+      const a = sighting.appearance;
+      const sx = width / a.canvas.w;
+      const sy = height / a.canvas.h;
+      avoid.push({ x1: a.box.x1 * sx, y1: a.box.y1 * sy, x2: a.box.x2 * sx, y2: a.box.y2 * sy });
+    }
+    const out = join(workDir, `panel-${n}-lettered.png`);
+    await bakeBubbles(raw, scene.dialogue ?? "", script.characters, out, avoid, n);
+    lettered.push(out);
+  }
+
   step("contents");
   const chapter = toChapter(script, panels);
   const contents = await writeContents(chapter, journey.label, journey.visibleChanges, script.storyObject.secretContent);
@@ -115,7 +143,7 @@ export async function runComic(idea: string, workDir: string, options: RunOption
 
   step("reel");
   const reelPath = await buildReel(
-    panels.map((path, i) => ({ path, sighting: sightings.find((s) => s.panelNumber === i + 1)?.appearance })),
+    lettered.map((path, i) => ({ path, sighting: sightings.find((s) => s.panelNumber === i + 1)?.appearance })),
     teaserPath,
     workDir,
   );
@@ -125,6 +153,7 @@ export async function runComic(idea: string, workDir: string, options: RunOption
     script,
     portraits: Object.fromEntries(portraitMap),
     panels,
+    lettered,
     panelRungs,
     sightings,
     journey,

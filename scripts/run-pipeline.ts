@@ -24,6 +24,7 @@ async function main() {
 
   console.log(`\n${r.script.seriesTitle} — ${r.script.chapterTitle}`);
   console.log(`paneles: ${r.panelRungs.join(", ")}`);
+  r.script.scenes.forEach((s) => console.log(`  [${s.panelNumber}] ${s.description} | ${s.dialogue}`));
   for (const s of r.sightings) console.log(`objeto en viñeta ${s.panelNumber}: "${s.query}" @ ${s.confidence.toFixed(2)}`);
   console.log(`recorrido: ${r.journey.visibleChanges}`);
   console.log(`\nSECRETO DEL GUION: ${r.script.storyObject.secretContent}`);
