@@ -1,0 +1,40 @@
+{
+  "id": "tides-of-cartagena",
+  "author": {
+    "id": "demo",
+    "name": "Tales",
+    "image": null
+  },
+  "createdAt": "2026-10-27T12:00:00.000Z",
+  "idea": "",
+  "seriesTitle": "Tides of Cartagena",
+  "chapterTitle": "The Green Bottle",
+  "logline": "A young fisherwoman pulls a green bottle from the sea that her grandfather instantly recognizes and fears.",
+  "panels": [
+    "panel-1-lettered.webp",
+    "panel-2-lettered.webp",
+    "panel-3-lettered.webp",
+    "panel-4-lettered.webp"
+  ],
+  "reel": "reel.mp4",
+  "gem": {
+    "name": "Green Glass Bottle with Rolled Paper",
+    "teaser": "collectible-teaser.webp",
+    "revealed": "collectible-revealed.webp",
+    "teaserLines": [
+      "Ramiro, forgive",
+      "your brother..."
+    ],
+    "revealedLines": [
+      "Ramiro, forgive",
+      "your brother Emilio.",
+      "I stole our boat money",
+      "and fled on the San Blas in 1969.",
+      "If the sea brings this back,",
+      "know I thought of Cartagena every day.",
+      "Find Tomas at Casa del Mar - he holds what I owe.",
+      "— Emilio"
+    ],
+    "supply": 100
+  }
+}
