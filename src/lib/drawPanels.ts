@@ -13,10 +13,17 @@ import { metaClient, metaFetch, MUSE_IMAGE_MODEL } from "./metaClient";
 import { MUSE_SPARK_MODEL } from "./writeContents";
 import { panelPrompt, portraitPrompt, type ComicBible, type PanelScene } from "./comicPrompts";
 
-/** Muse Image takes sizes as WxH and rounds to the nearest size it supports. */
+/**
+ * Muse Image takes sizes as WxH and rounds to the nearest size it supports
+ * (1080x1920 comes back as 1152x2048, still 9:16).
+ *
+ * Every panel is the same vertical 9:16. Token Comic lets a creator mix layouts
+ * on a page; this demo does not, on purpose: a vertical strip reads on a phone,
+ * is already the shape of a Reel or a Story, and gives SAM a clip with no
+ * letterboxing to undo.
+ */
 export const PORTRAIT_SIZE = "1024x1536";
-export const PANEL_SIZES = { tall: "1080x1920", square: "1024x1024", wide: "1536x1024" } as const;
-export type PanelShape = keyof typeof PANEL_SIZES;
+export const PANEL_SIZE = "1080x1920";
 
 async function decodeImage(res: Response, outPath: string): Promise<string> {
   if (!res.ok) throw new Error(`Muse Image failed (${res.status}): ${await res.text()}`);
@@ -131,7 +138,6 @@ export type PanelRung = "references" | "softened" | "no-references";
  */
 export async function drawPanel(
   scene: PanelScene,
-  shape: PanelShape,
   bible: ComicBible,
   portraits: Map<string, string>,
   outPath: string,
@@ -141,7 +147,7 @@ export async function drawPanel(
     .filter((c) => scene.characters.some((n) => n.trim().toLowerCase() === c.name.toLowerCase()))
     .map((c) => portraits.get(c.name.toLowerCase()))
     .filter((p): p is string => Boolean(p));
-  const size = PANEL_SIZES[shape];
+  const size = PANEL_SIZE;
 
   try {
     await generateWithReferences(panelPrompt(scene, bible), refs, size, outPath);

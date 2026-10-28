@@ -63,13 +63,18 @@ export interface ComicBible {
   storyObject?: StoryObject;
 }
 
-/** Sent last, as an exclusion list rather than a sentence to reason about. */
-export const NEGATIVE_PROMPT =
+/** What a comic model draws when it hears "comic". Excluded on every panel. */
+const LAYOUT_EXCLUSIONS =
   "caption boxes, narration boxes, title boxes, text panels, speech bubbles, speech " +
   "balloons, thought bubbles, comic panel borders, gutters, multi-panel grid, page " +
-  "layout, any text, letters, words, numbers, captions, labels, watermarks, signatures, " +
-  "logos, gibberish characters, emoji, white frame, white border, picture frame, " +
-  "margins around the image";
+  "layout, captions, labels, watermarks, signatures, logos, emoji, white frame, white " +
+  "border, picture frame, margins around the image";
+
+/** Stray lettering. Excluded everywhere EXCEPT on a panel showing the story object. */
+const TEXT_EXCLUSIONS = "any text, letters, words, numbers, gibberish characters";
+
+/** Sent last, as an exclusion list rather than a sentence to reason about. */
+export const NEGATIVE_PROMPT = `${LAYOUT_EXCLUSIONS}, ${TEXT_EXCLUSIONS}`;
 
 function renderCharacter(c: Character): string {
   const t = c.traits;
@@ -169,12 +174,29 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible): string {
     );
   }
 
+  /**
+   * The object must be SEEN and must not be READ.
+   *
+   * The first version said "hide its contents: folded, edge-on or obscured",
+   * while the exclusion list banned any text at all. Two orders that cannot both
+   * hold, and the model settled it by crumpling the report into a ball — no text
+   * visible, nothing recognisable either. That wrecks the collectible: SAM needs
+   * something to find, and the reader needs to know what they are looking at.
+   *
+   * So the object keeps its shape and its heading; only the body is withheld,
+   * by distance, angle and focus rather than by destroying the object. And on
+   * these panels the blanket text exclusion is dropped, so the heading is not
+   * fighting the negative prompt.
+   */
   const object = bible.storyObject;
-  if (object && object.plantedInPanels.includes(scene.panelNumber)) {
+  const objectHere = Boolean(object && object.plantedInPanels.includes(scene.panelNumber));
+  if (object && objectHere) {
     parts.push(
-      `[STORY OBJECT] ${object.name} appears in this panel — ${object.description}. Show it ` +
-        "clearly enough to be noticed, but its contents must stay HIDDEN: folded, edge-on or " +
-        "partly obscured. Nothing written on it may be legible",
+      `[STORY OBJECT] ${object.name} appears in this panel — ${object.description}. It is ` +
+        "clearly visible and keeps its real shape: intact, not crumpled into a ball, held or " +
+        `placed so the reader recognises it at once. Its heading "${object.name}" may be ` +
+        "legible. Its BODY must stay unreadable — fine print too small, too far, at an angle " +
+        "or out of focus to make out. Show that it has contents; do not let them be read",
     );
   }
 
@@ -183,9 +205,14 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible): string {
       "not a grid, no panel borders; the artwork fills the whole image edge to edge",
   );
   parts.push(
-    "A silent wordless illustration — no caption box, no narration box, no text surfaces",
+    objectHere
+      ? "No caption box, no narration box and no speech bubbles — the only lettering in " +
+          "the frame is what is printed on the story object"
+      : "A silent wordless illustration — no caption box, no narration box, no text surfaces",
   );
-  parts.push(`Do NOT include any of the following: ${NEGATIVE_PROMPT}`);
+  parts.push(
+    `Do NOT include any of the following: ${objectHere ? LAYOUT_EXCLUSIONS : NEGATIVE_PROMPT}`,
+  );
 
   return parts.join(". ").replace(/\s+/g, " ").trim();
 }

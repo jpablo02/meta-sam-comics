@@ -129,6 +129,74 @@ export async function trackObject(
 }
 
 /**
+ * Segment ONE panel image with a noun phrase.
+ *
+ * SAM answers a text prompt with the single instance it rates best — measured:
+ * "paper" and "sheet of paper" returned one box per panel, and on a panel full
+ * of paperwork that box was a note under a phone while the report sat in the
+ * character's hands. The phrase is what picks the instance ("paper held in
+ * hands" found the report in both panels), which is why the phrase is written
+ * by a model that has read the scene — see locateObject.
+ *
+ * Returns null when SAM finds nothing; an empty answer is not an error.
+ */
+export async function segmentImage(
+  imagePath: string,
+  prompt: string,
+  panel: number,
+): Promise<PanelAppearance | null> {
+  const { readFile } = await import("node:fs/promises");
+  const b64 = (await readFile(imagePath)).toString("base64");
+
+  const res = await metaFetch("/responses", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: SAM_MODEL,
+      stream: true,
+      metadata: { mask_encoding: "one_bit", include_confidence: "true" },
+      input: [
+        {
+          type: "message",
+          role: "user",
+          content: [
+            { type: "input_text", text: prompt },
+            { type: "input_image", image_url: `data:image/png;base64,${b64}` },
+          ],
+        },
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error(`SAM request failed (${res.status}): ${await res.text()}`);
+
+  const detections: Detection[] = [];
+  for (const line of (await res.text()).split("\n")) {
+    if (!line.startsWith("data: ")) continue;
+    let event: { type?: string; delta?: string };
+    try {
+      event = JSON.parse(line.slice(6));
+    } catch {
+      continue;
+    }
+    if (event.type !== "response.output_text.delta" || !event.delta) continue;
+    BOX_RE.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = BOX_RE.exec(event.delta)) !== null) {
+      detections.push({
+        frame: 0,
+        samObjectId: Number(m[2]),
+        panel,
+        box: { x1: Number(m[3]), y1: Number(m[4]), x2: Number(m[5]), y2: Number(m[6]) },
+        canvas: { w: Number(m[7]), h: Number(m[8]) },
+        confidence: Number(m[9]),
+      });
+    }
+  }
+
+  return foldByPanel(detections).sort((a, b) => b.confidence - a.confidence)[0] ?? null;
+}
+
+/**
  * Fold per-frame detections into one appearance per (panel, track), keeping the
  * frame SAM was most sure about — that is the one worth cropping.
  */

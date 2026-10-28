@@ -17,8 +17,8 @@ const PROMPT = "white paper document";
 const STORY = {
   chapterTitle: "Elliptic Curve P256",
   synopsis:
-    "A character named Nyx finds a printed research document called the 'P256 Flaw Report' " +
-    "and later shows it to Wesley.",
+    "Zully finds a printed research document called the 'P256 Flaw Report' " +
+    "and later hands it to Wesley.",
 };
 
 async function main() {
@@ -26,7 +26,11 @@ async function main() {
   await rm(work, { recursive: true, force: true });
   await mkdir(work, { recursive: true });
 
-  const panels = [0, 1, 2, 3].map((i) => join(process.cwd(), "public", "chapter", `panel-${i}.png`));
+  // Optional: a folder holding panel-1.png … panel-4.png (e.g. tmp/consistency).
+  const dir = process.argv[2];
+  const panels = dir
+    ? [1, 2, 3, 4].map((i) => join(process.cwd(), dir, `panel-${i}.png`))
+    : [0, 1, 2, 3].map((i) => join(process.cwd(), "public", "chapter", `panel-${i}.png`));
 
   console.log("1. building clip");
   const clip = await buildClip(panels, work);
