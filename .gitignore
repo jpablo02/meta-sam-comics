@@ -28,3 +28,13 @@ yarn-error.log*
 *.tsbuildinfo
 .idea/
 .vscode/
+
+# Local store (comics made on this machine, collections)
+data/
+# Resized copies the file route caches next to the originals
+*.w360.webp
+*.w720.webp
+*.w1080.webp
+*.w360.jpg
+*.w720.jpg
+*.w1080.jpg

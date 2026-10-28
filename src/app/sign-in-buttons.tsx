@@ -2,36 +2,29 @@
 
 import { signIn, signOut } from "next-auth/react";
 
-const LABELS = { facebook: "Continue with Facebook", google: "Continue with Google" } as const;
-
-export function SignInButtons({ providers }: { providers: Array<keyof typeof LABELS> }) {
-  if (providers.length === 0) {
+export function SignInButtons({ providers }: { providers: Array<"facebook" | "google"> }) {
+  if (!providers.includes("facebook")) {
     return (
-      <p className="muted">
-        No sign-in provider is configured. Set FACEBOOK_CLIENT_ID and FACEBOOK_CLIENT_SECRET in
-        .env.local — see docs/facebook-app-setup.md.
+      <p>
+        Sign-in is not configured. Set FACEBOOK_CLIENT_ID and FACEBOOK_CLIENT_SECRET in .env.local — see
+        docs/facebook-app-setup.md.
       </p>
     );
   }
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      {providers.map((p) => (
-        <button
-          key={p}
-          type="button"
-          className={p === "facebook" ? "button" : "button secondary"}
-          onClick={() => signIn(p)}
-        >
-          {LABELS[p]}
-        </button>
-      ))}
-    </div>
+    <button type="button" className="button block" onClick={() => signIn("facebook")}>
+      Continue with Facebook
+    </button>
   );
 }
 
 export function SignOutButton() {
   return (
-    <button type="button" className="button secondary" onClick={() => signOut()}>
+    <button
+      type="button"
+      onClick={() => signOut()}
+      style={{ border: 0, background: "none", padding: 0, font: "inherit", color: "var(--accent)", cursor: "pointer", textDecoration: "underline" }}
+    >
       Sign out
     </button>
   );
