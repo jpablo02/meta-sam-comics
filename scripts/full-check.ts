@@ -67,13 +67,10 @@ async function main() {
       "and burnt, dramatic rim lighting",
   });
 
-  console.log("7. compose");
-  const teaserPath = join(work, "collectible-teaser.png");
-  const revealedPath = join(work, "collectible-revealed.png");
-  await composeContents(artwork, teaserPath, { title: contents.title, lines: contents.teaser });
-  await composeContents(artwork, revealedPath, { title: contents.title, lines: contents.revealed });
 
-  console.log(`\nDONE\n  ${teaserPath}\n  ${revealedPath}`);
+  console.log(`
+DONE
+  ${artwork}`);
   console.log(`\nforeshadow: ${contents.foreshadow}`);
 }
 
