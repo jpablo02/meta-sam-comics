@@ -194,9 +194,12 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible): string {
     parts.push(
       `[STORY OBJECT] ${object.name} appears in this panel — ${object.description}. It is ` +
         "clearly visible and keeps its real shape: intact, not crumpled into a ball, held or " +
-        `placed so the reader recognises it at once. Its heading "${object.name}" may be ` +
-        "legible. Its BODY must stay unreadable — fine print too small, too far, at an angle " +
-        "or out of focus to make out. Show that it has contents; do not let them be read",
+        "placed so the reader recognises it at once. Only printing the real object would " +
+        "carry may be legible — a report's title, a company logo, a route number — never its " +
+        `name used as a label ("${object.name}" is how the story refers to it, not text on ` +
+        "it, unless it is literally its printed title). Its BODY must stay unreadable — fine " +
+        "print or handwriting too small, too far, at an angle or out of focus to make out. " +
+        "Show that it has contents; do not let them be read",
     );
   }
 
