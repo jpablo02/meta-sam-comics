@@ -58,23 +58,43 @@ export async function revealTeaser(cropPath: string, outPath: string, options: R
   return generateWithReferences(prompt, [cropPath], COLLECTIBLE_SIZE, outPath);
 }
 
-/** What the collector gets: the same object with its real text printed on it. */
+/**
+ * What the collector gets: the teaser card, with the real text now on the object.
+ *
+ * Drawn FROM the teaser, not from the crop: the card turns over in the UI, and
+ * the reveal only lands if it is the same object in the same pose, now readable.
+ * Drawn from the crop alone, the two cards came back as two different daggers.
+ */
 export async function revealContents(
   cropPath: string,
   outPath: string,
   options: RevealOptions,
   contents: ObjectContents,
+  teaserPath?: string,
 ): Promise<string> {
   /**
    * The text goes between markers, one line per line, with no bullets or labels.
    * Muse Image prints what it is given with the same fidelity that makes this
    * work at all: handed "Title: …" and "- line", it engraved "Title:" and the
    * dashes on a love inscription inside a watch lid.
+   *
+   * It must also be told what the text is NOT. Asked only for "engraved
+   * letters", it set a glowing serif caption over a dagger's blade — legible,
+   * and plainly pasted on.
    */
   const lines = [contents.title, ...contents.revealed].map((l) => l.trim()).filter(Boolean);
+  const staging = teaserPath
+    ? [
+        `Reference image 1 is a collectible card of a ${options.objectName}. Reproduce it exactly — same`,
+        "object, same pose, same composition, background, lighting and colours — changing ONE thing:",
+        "the writing on the object is now sharp and readable.",
+        `Reference image 2 shows the same ${options.objectName} as it appears in the story; use it only`,
+        "to keep the object faithful.",
+      ]
+    : [...basePrompt(options), "Every line written on it must be sharp and readable."];
+
   const prompt = [
-    ...basePrompt(options),
-    "Every line written on it must be sharp and readable.",
+    ...staging,
     "",
     "Write EXACTLY the text between the markers on the object, line by line as given — no",
     "extra words, no labels, no bullet points, no quotation marks:",
@@ -82,8 +102,16 @@ export async function revealContents(
     ...lines,
     ">>>",
     "",
-    "Match the lettering to the object: engraved letters on metal, typewriter print on a report,",
-    "handwriting on a note, stamped ink on a ticket.",
+    "The text is PART OF THE OBJECT, made the way that object would really carry it:",
+    "- metal, stone, wood: cut INTO the surface — real depth, shadow inside every groove, light",
+    "  catching the edges, the same patina and wear as the rest of the object;",
+    "- paper, parchment, cloth: ink or graphite absorbed into the fibres, following every fold,",
+    "  crease and curl; handwriting on a letter, typewriter print on a report, stamped ink on a ticket;",
+    "- glass, ceramic, leather: etched, painted, or burned in, as that material allows.",
+    "The lettering follows the surface's shape, perspective and curvature, sized to fit it, in a",
+    "style true to the object's era. It is NOT a caption: no glow, no light coming from the letters,",
+    "no text box, no flat overlay, no lettering floating in front of the object.",
   ].join("\n");
-  return generateWithReferences(prompt, [cropPath], COLLECTIBLE_SIZE, outPath);
+  const references = teaserPath ? [teaserPath, cropPath] : [cropPath];
+  return generateWithReferences(prompt, references, COLLECTIBLE_SIZE, outPath);
 }

@@ -138,7 +138,7 @@ export async function runComic(idea: string, workDir: string, options: RunOption
   const reveal = { objectName: script.storyObject.name };
   const teaserPath = await toPng(await revealTeaser(best.cropPath, join(workDir, "collectible-teaser.webp"), reveal));
   const revealedPath = await toPng(
-    await revealContents(best.cropPath, join(workDir, "collectible-revealed.webp"), reveal, contents),
+    await revealContents(best.cropPath, join(workDir, "collectible-revealed.webp"), reveal, contents, teaserPath),
   );
 
   step("reel");

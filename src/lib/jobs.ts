@@ -20,7 +20,7 @@ function newId(): string {
 /** The idea as the script writer receives it: the gem hint, if any, is part of it. */
 function fullIdea(idea: string, gemHint?: string): string {
   const hint = gemHint?.trim();
-  return hint ? `${idea.trim()}\n\nThe object worth keeping in this story: ${hint}` : idea.trim();
+  return hint ? `${idea.trim()}\n\nThe gem — the object hidden in this story that readers will collect: ${hint}` : idea.trim();
 }
 
 export async function startComic(author: Author, idea: string, gemHint?: string): Promise<string> {

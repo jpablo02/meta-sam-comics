@@ -61,7 +61,7 @@ export default async function ComicPage({ params }: Params) {
     user ? findCollection(id, user.id) : Promise.resolve(null),
   ]);
   const isAuthor = user?.id === comic.author.id;
-  const canRead = isAuthor || mine !== null;
+  const canRead = mine !== null;
 
   return (
     <>
