@@ -120,7 +120,8 @@ export async function drawCover(
     return await generateWithReferences(coverPrompt({ ...input, withGemReference: Boolean(gemReference) }), refs, PORTRAIT_SIZE, outPath);
   } catch (err) {
     if (!isPolicyRejection(err)) throw err;
-    return generateImage(coverPrompt({ ...input, castNames: [], withGemReference: false }), PORTRAIT_SIZE, outPath);
+    console.warn(`[cover] policy rejection with references — drawing without them: ${String(err).slice(0, 200)}`);
+    return generateImage(coverPrompt({ ...input, withGemReference: false }), PORTRAIT_SIZE, outPath);
   }
 }
 

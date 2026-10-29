@@ -104,7 +104,7 @@ export async function runComic(idea: string, workDir: string, options: RunOption
       {
         artStyle: bible.artStyle,
         logline: script.logline,
-        castNames: script.characters.map((c) => c.name),
+        cast: script.characters,
         gemName: script.storyObject.name,
         setting: script.locations[0]?.description,
       },

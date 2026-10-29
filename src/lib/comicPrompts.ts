@@ -153,7 +153,7 @@ export interface CoverInput {
   artStyle: string;
   logline: string;
   /** The cast on the cover, in the order their portraits are attached. */
-  castNames: string[];
+  cast: Character[];
   gemName: string;
   /** Where the story happens, for the backdrop. */
   setting?: string;
@@ -166,19 +166,27 @@ export interface CoverInput {
  * story the way a cover does: the cast, the world, and the gem catching the
  * light somewhere in it. The title is laid over it by the app, never drawn:
  * lettering in the art would be one more thing to get wrong.
+ *
+ * The cast is described in words too, as on a panel. With names alone the
+ * portraits were ignored: the demo's cover came back with a stranger in a cap
+ * where Ramiro and his sombrero vueltiao should be — twice.
  */
 export function coverPrompt(c: CoverInput): string {
   const refs: string[] = [];
-  if (c.castNames.length > 0) {
+  if (c.cast.length > 0) {
     refs.push(
-      `The ${c.withGemReference ? `first ${c.castNames.length} attached images are` : "attached images are"} ` +
-        `IDENTITY REFERENCES of the cast, one per image, in this order: ${c.castNames.join(", ")}. ` +
-        "Copy each character exactly — face, skin tone, hair, outfit, build. Take only identity from them",
+      `The ${c.withGemReference ? `first ${c.cast.length} attached images are` : "attached images are"} ` +
+        `IDENTITY REFERENCES of the cast, one per image, in this order: ${c.cast.map((p) => p.name).join(", ")}. ` +
+        "They are NOT style inspiration. Copy each character exactly — same face, skin tone, hair color, " +
+        "length and cut, outfit and build. Take ONLY identity from them. Where the references and any text " +
+        "disagree, the REFERENCES WIN",
+      fidelityDirective(),
+      ...c.cast.map(renderCharacter),
     );
   }
   if (c.withGemReference) {
     refs.push(
-      `The ${c.castNames.length > 0 ? "LAST attached image" : "attached image"} is the reference of ${c.gemName}: ` +
+      `The ${c.cast.length > 0 ? "LAST attached image" : "attached image"} is the reference of ${c.gemName}: ` +
         "draw that exact object",
     );
   }

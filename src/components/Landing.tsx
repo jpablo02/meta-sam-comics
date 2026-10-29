@@ -62,7 +62,7 @@ export function Landing({ providers, exampleId }: { providers: Array<"facebook" 
       </div>
 
       <footer className="landing-legal">
-        <a href="/privacy">Privacy</a> · <a href="/data-deletion">Data deletion</a>
+        <a href="/how-it-works">How it works</a> · <a href="/privacy">Privacy</a> · <a href="/data-deletion">Data deletion</a>
       </footer>
     </main>
   );

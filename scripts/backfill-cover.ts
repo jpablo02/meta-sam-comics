@@ -11,9 +11,11 @@
 import { config as loadEnv } from "dotenv";
 loadEnv({ path: ".env.local" });
 import { readdir, readFile, rename, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { drawCover } from "../src/lib/drawPanels";
 import { DEFAULT_ART_STYLE, type ComicScript } from "../src/lib/writeScript";
+import type { Character } from "../src/lib/comicPrompts";
 import { comicDir, type StoredComic } from "../src/lib/store";
 import { buildStoryReel } from "../src/lib/storyReel";
 
@@ -29,24 +31,26 @@ async function main() {
     ? (JSON.parse(await readFile(join(runDir, "result.json"), "utf8")) as { script: ComicScript }).script
     : null;
   // Only the cast that is in this story (a run folder can hold older portraits).
-  const cast = script
-    ? script.characters.map((c) => c.name).filter((n) => portraits.includes(`portrait-${n.toLowerCase()}.webp`))
-    : portraits.map((f) => f.replace(/^portrait-|\.webp$/g, ""));
+  // Comics in the store kept no script: their cast is known by name only.
+  const cast: Character[] = script
+    ? script.characters.filter((c) => portraits.includes(`portrait-${c.name.toLowerCase()}.webp`))
+    : portraits.map((f) => ({ name: f.replace(/^portrait-|\.webp$/g, ""), appearance: "", traits: {} as Character["traits"] }));
 
   const webp = await drawCover(
     {
       artStyle: script?.artStyle ?? DEFAULT_ART_STYLE,
       logline: comic.logline,
-      castNames: cast,
+      cast,
       gemName: comic.gem.name,
       setting: script?.locations[0]?.description,
     },
-    cast.map((n) => join(portraitDir, `portrait-${n.toLowerCase()}.webp`)),
-    join(dir, comic.gem.teaser),
+    cast.map((c) => join(portraitDir, `portrait-${c.name.toLowerCase()}.webp`)),
+    // The object sheet when the run kept one; the teaser card otherwise.
+    runDir && existsSync(join(runDir, "object-sheet.webp")) ? join(runDir, "object-sheet.webp") : join(dir, comic.gem.teaser),
     join(dir, "cover.webp"),
   );
   comic.cover = "cover.webp";
-  console.log(`${id}: cover drawn (${cast.join(", ")})`);
+  console.log(`${id}: cover drawn (${cast.map((c) => c.name).join(", ")})`);
 
   // The reel reads PNG-or-WebP alike through sharp; it just needs the paths.
   await buildStoryReel(

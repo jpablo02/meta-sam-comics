@@ -38,7 +38,7 @@ export default async function Home() {
         ))}
 
         <div className="footer-links">
-          <a href="/privacy">Privacy</a> · <a href="/data-deletion">Data deletion</a> · <SignOutButton />
+          <a href="/how-it-works">How it works</a> · <a href="/privacy">Privacy</a> · <a href="/data-deletion">Data deletion</a> · <SignOutButton />
         </div>
       </main>
     </>
