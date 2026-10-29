@@ -22,7 +22,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const comic = await getComic(id).catch(() => null);
   if (comic) {
-    const allowed = [...comic.panels, comic.reel, comic.spotlightReel, comic.gem.teaser, comic.gem.revealed].filter(Boolean);
+    const allowed = [...comic.panels, comic.cover, comic.reel, comic.spotlightReel, comic.gem.teaser, comic.gem.revealed].filter(Boolean);
     if (!allowed.includes(name)) return new Response("Not found", { status: 404 });
     if (name === comic.gem.revealed) {
       const user = await currentUser();

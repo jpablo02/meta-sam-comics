@@ -8,6 +8,7 @@ const STEPS = [
   { key: "script", label: "Writing the story" },
   { key: "portraits", label: "Casting the characters" },
   { key: "panels", label: "Drawing the panels" },
+  { key: "cover", label: "Painting the cover" },
   { key: "object", label: "Finding the gem in the art" },
   { key: "dialogue", label: "Lettering the dialogue" },
   { key: "contents", label: "Writing what the gem hides" },

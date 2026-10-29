@@ -21,7 +21,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
 import { writeScript, toBible, toChapter, type ComicScript } from "./writeScript";
-import { drawObjectSheet, drawPortraits, drawPanel, type PanelRung } from "./drawPanels";
+import { drawCover, drawObjectSheet, drawPortraits, drawPanel, type PanelRung } from "./drawPanels";
 import { locateInPanel, describeJourney, type Sighting, type Journey } from "./locateObject";
 import { writeContents, type ObjectContents } from "./writeContents";
 import { revealTeaser, revealContents } from "./revealObject";
@@ -33,6 +33,7 @@ export type Step =
   | "script"
   | "portraits"
   | "panels"
+  | "cover"
   | "object"
   | "dialogue"
   | "contents"
@@ -43,6 +44,8 @@ export type Step =
 export interface ComicResult {
   script: ComicScript;
   portraits: Record<string, string>;
+  /** The comic's cover: its own art, no title drawn on it. */
+  coverPath: string;
   /** Wordless art, as drawn. SAM reads these. */
   panels: string[];
   /** The same panels with their dialogue baked in. Readers see these. */
@@ -94,6 +97,22 @@ export async function runComic(idea: string, workDir: string, options: RunOption
     panelRungs.push(await drawPanel(scene, bible, portraitMap, out, objectSheet));
     panels.push(await toPng(out));
   }
+
+  step("cover");
+  const coverPath = await toPng(
+    await drawCover(
+      {
+        artStyle: bible.artStyle,
+        logline: script.logline,
+        castNames: script.characters.map((c) => c.name),
+        gemName: script.storyObject.name,
+        setting: script.locations[0]?.description,
+      },
+      script.characters.map((c) => portraitMap.get(c.name.toLowerCase())).filter((p): p is string => Boolean(p)),
+      objectSheet,
+      join(workDir, "cover.webp"),
+    ),
+  );
 
   step("object", script.storyObject.name);
   const object = { name: script.storyObject.name, description: script.storyObject.description };
@@ -155,6 +174,7 @@ export async function runComic(idea: string, workDir: string, options: RunOption
     {
       seriesTitle: script.seriesTitle,
       chapterTitle: script.chapterTitle,
+      coverPath,
       panels: lettered.map((path, i) => ({ path, dialogue: script.scenes[i]?.dialogue ?? "" })),
       teaserPath,
     },
@@ -170,6 +190,7 @@ export async function runComic(idea: string, workDir: string, options: RunOption
   return {
     script,
     portraits: Object.fromEntries(portraitMap),
+    coverPath,
     panels,
     lettered,
     panelRungs,

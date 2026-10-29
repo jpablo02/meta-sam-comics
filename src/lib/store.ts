@@ -41,6 +41,8 @@ export interface StoredComic {
   logline: string;
   /** File names inside the comic's folder, in reading order. */
   panels: string[];
+  /** The comic's own cover art; older comics use their first panel. */
+  cover?: string;
   /** Story reel: the one readers share. */
   reel: string;
   /** Spotlight reel: how SAM found the gem. Older comics have none. */
