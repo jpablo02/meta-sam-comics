@@ -47,15 +47,31 @@ function basePrompt({ objectName, treatment }: RevealOptions): string[] {
   ];
 }
 
-/** What anyone sees: the object, its contents unreadable. */
-export async function revealTeaser(cropPath: string, outPath: string, options: RevealOptions): Promise<string> {
+/**
+ * What anyone sees: the object, its contents unreadable.
+ *
+ * With the object sheet as a second reference, the card is the object the
+ * panels were drawn from — the crop alone is a few hundred pixels of it.
+ */
+export async function revealTeaser(
+  cropPath: string,
+  outPath: string,
+  options: RevealOptions,
+  objectSheet?: string | null,
+): Promise<string> {
   const prompt = [
     ...basePrompt(options),
+    objectSheet
+      ? "The second reference image is the clean reference sheet of this same object: match its shape, materials and how its parts fit."
+      : "",
     "Its contents are present but NOT readable: the writing is blurred, faded, scorched or",
     "partly covered by shadow, so the viewer can tell there is a message and cannot read a",
     "single word of it.",
-  ].join(" ");
-  return generateWithReferences(prompt, [cropPath], COLLECTIBLE_SIZE, outPath);
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const references = objectSheet ? [cropPath, objectSheet] : [cropPath];
+  return generateWithReferences(prompt, references, COLLECTIBLE_SIZE, outPath);
 }
 
 /**

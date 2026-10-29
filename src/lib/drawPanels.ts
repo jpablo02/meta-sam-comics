@@ -11,7 +11,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { metaClient, metaFetch, MUSE_IMAGE_MODEL } from "./metaClient";
 import { MUSE_SPARK_MODEL } from "./writeContents";
-import { panelPrompt, portraitPrompt, type ComicBible, type PanelScene } from "./comicPrompts";
+import { objectSheetPrompt, panelPrompt, portraitPrompt, type ComicBible, type PanelScene } from "./comicPrompts";
 
 /**
  * Muse Image takes sizes as WxH and rounds to the nearest size it supports
@@ -96,6 +96,14 @@ export async function drawPortraits(bible: ComicBible, workDir: string): Promise
   return portraits;
 }
 
+/** The story object's reference sheet, drawn once. Null when the story has no object. */
+export async function drawObjectSheet(bible: ComicBible, workDir: string): Promise<string | null> {
+  if (!bible.storyObject) return null;
+  const out = join(workDir, "object-sheet.webp");
+  await generateImage(objectSheetPrompt(bible.storyObject, bible), PORTRAIT_SIZE, out);
+  return out;
+}
+
 function isPolicyRejection(err: unknown): boolean {
   return /content_policy_violation/.test(String(err));
 }
@@ -141,16 +149,20 @@ export async function drawPanel(
   bible: ComicBible,
   portraits: Map<string, string>,
   outPath: string,
+  objectSheet: string | null = null,
 ): Promise<PanelRung> {
   // Same order as panelPrompt names them, so "in this order" stays true.
   const refs = bible.characters
     .filter((c) => scene.characters.some((n) => n.trim().toLowerCase() === c.name.toLowerCase()))
     .map((c) => portraits.get(c.name.toLowerCase()))
     .filter((p): p is string => Boolean(p));
+  // The object sheet goes LAST, after the portraits, as panelPrompt says.
+  const withSheet = Boolean(objectSheet && bible.storyObject?.plantedInPanels.includes(scene.panelNumber));
+  if (withSheet) refs.push(objectSheet!);
   const size = PANEL_SIZE;
 
   try {
-    await generateWithReferences(panelPrompt(scene, bible), refs, size, outPath);
+    await generateWithReferences(panelPrompt(scene, bible, withSheet), refs, size, outPath);
     return "references";
   } catch (err) {
     if (!isPolicyRejection(err) || refs.length === 0) throw err;
@@ -158,7 +170,7 @@ export async function drawPanel(
 
   const softened = { ...scene, imagePrompt: await softenScene(scene.imagePrompt) };
   try {
-    await generateWithReferences(panelPrompt(softened, bible), refs, size, outPath);
+    await generateWithReferences(panelPrompt(softened, bible, withSheet), refs, size, outPath);
     return "softened";
   } catch (err) {
     if (!isPolicyRejection(err)) throw err;

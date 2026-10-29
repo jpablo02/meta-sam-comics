@@ -19,7 +19,8 @@ const IDEA =
 async function main() {
   const t0 = Date.now();
   const lap = () => `${((Date.now() - t0) / 1000).toFixed(0)}s`;
-  const work = join(process.cwd(), "tmp", "run");
+  // RUN_DIR keeps a test run from overwriting tmp/run, which seeds the demo.
+  const work = join(process.cwd(), process.env.RUN_DIR ?? join("tmp", "run"));
   const r = await runComic(IDEA, work, { onStep: (s, d) => console.log(`[${lap()}] ${s}${d ? " — " + d : ""}`) });
 
   console.log(`\n${r.script.seriesTitle} — ${r.script.chapterTitle}`);

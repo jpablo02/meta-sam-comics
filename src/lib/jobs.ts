@@ -46,7 +46,8 @@ export async function startComic(author: Author, idea: string, gemHint?: string)
         chapterTitle: r.script.chapterTitle,
         logline: r.script.logline,
         panels: r.lettered.map(name),
-        reel: name(r.reelPath),
+        reel: name(r.storyReelPath),
+        spotlightReel: name(r.reelPath),
         gem: {
           name: r.script.storyObject.name,
           teaser: name(r.teaserPath),

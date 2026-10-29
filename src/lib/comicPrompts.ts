@@ -52,6 +52,8 @@ export interface PanelScene {
 export interface StoryObject {
   name: string;
   description: string;
+  /** Real size against a hand ("about 25 cm tall, held in one hand"). */
+  scale?: string;
   /** Panels where the object appears, 1-based. */
   plantedInPanels: number[];
 }
@@ -121,6 +123,32 @@ export function portraitPrompt(character: Character, bible: ComicBible): string 
   ].join(". ");
 }
 
+/**
+ * Prompt for the story object's reference sheet — the object's portrait.
+ *
+ * Without it, every panel drew the object from a sentence: the green bottle
+ * changed size from panel to panel, and in one its rolled letter sat on top of
+ * the cork instead of inside the glass. A sentence leaves room for that; pixels
+ * do not. Drawn once, passed to every panel that plants it — as the character
+ * portraits are.
+ */
+export function objectSheetPrompt(object: StoryObject, bible: ComicBible): string {
+  return [
+    bible.artStyle,
+    `Object reference sheet of ONE single object: ${object.name} — ${object.description}`,
+    "Shown whole and intact, in three-quarter view, centred, evenly lit, on a plain flat " +
+      "neutral background, filling most of the frame, in sharp focus",
+    "Every part in its real place, the way the physical object is assembled: what is inside " +
+      "something is visibly INSIDE it, what closes it closes it, nothing floating or detached",
+    object.scale ? `Real size: ${object.scale} — draw its true proportions` : "",
+    "Any writing on it is present but too small or faint to read",
+    "This is a reference sheet, not a story panel: exactly ONE object, no hands, no people, " +
+      "no scenery, no labels, no captions",
+  ]
+    .filter(Boolean)
+    .join(". ");
+}
+
 /** Remove clothing/hair phrasing a script writer slipped into the scene. */
 export function stripAppearance(scene: string): string {
   return scene
@@ -131,9 +159,10 @@ export function stripAppearance(scene: string): string {
 
 /**
  * Prompt for one panel. The portraits of `scene.characters` must be attached as
- * reference images, in the same order as they are named here.
+ * reference images, in the same order as they are named here — followed, when
+ * `withObjectSheet` is set, by the story object's reference sheet, LAST.
  */
-export function panelPrompt(scene: PanelScene, bible: ComicBible): string {
+export function panelPrompt(scene: PanelScene, bible: ComicBible, withObjectSheet = false): string {
   const present = bible.characters.filter((c) =>
     scene.characters.some((n) => n.trim().toLowerCase() === c.name.trim().toLowerCase()),
   );
@@ -141,7 +170,8 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible): string {
 
   if (present.length > 0) {
     parts.push(
-      "The attached images are IDENTITY REFERENCES: full-body reference sheets of the " +
+      `The ${withObjectSheet ? `first ${present.length} attached images` : "attached images"} are ` +
+        "IDENTITY REFERENCES: full-body reference sheets of the " +
         "characters in this panel, one per image, in this order: " +
         `${present.map((c) => c.name).join(", ")}. They are NOT style inspiration and NOT a ` +
         "layout to copy. Copy each character exactly — same face, skin tone, hair color, " +
@@ -201,6 +231,16 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible): string {
         "print or handwriting too small, too far, at an angle or out of focus to make out. " +
         "Show that it has contents; do not let them be read",
     );
+    if (withObjectSheet) {
+      parts.push(
+        `[OBJECT REFERENCE] The ${present.length > 0 ? "LAST attached image" : "attached image"} is ` +
+          `the reference sheet of ${object.name}. Draw THIS exact object: same shape, ` +
+          "proportions, materials, colours and wear, every part where the sheet puts it " +
+          `(what is inside stays inside, what closes it stays closed)` +
+          (object.scale ? `, at its real size — ${object.scale} — next to hands and bodies` : "") +
+          ". Take only the object from it; its position, angle and light come from the scene",
+      );
+    }
   }
 
   parts.push(

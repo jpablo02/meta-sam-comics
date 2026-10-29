@@ -48,6 +48,8 @@ export interface ComicScript {
   storyObject: {
     name: string;
     description: string;
+    /** Real size against a hand — keeps it the same size in every panel. */
+    scale?: string;
     /** What it actually says or holds. Never drawn in a panel. */
     secretContent: string;
     plantedInPanels: number[];
@@ -84,6 +86,9 @@ lives INSIDE the plot; what it says or holds is revealed only to whoever collect
   engraved initial. Nothing generic or symbolic.
 - It must appear in AT LEAST TWO panels ("plantedInPanels"), visibly handled by a character,
   its contents never readable on the page.
+- "description" says what it is made of, its colours, and how its parts fit together — where
+  anything it holds actually sits (a letter rolled INSIDE the bottle, the cork IN its neck).
+- "scale" is its real size against a human hand: "about 25 cm tall, held in one hand".
 - "secretContent" is the collector's reward: the exact words, the photo, what the key opens.
   It must add real information to the story — something that changes how the chapter reads.
 - Write the story so the object MATTERS: someone looks at it, reacts to it, passes it on.
@@ -111,7 +116,7 @@ Answer with strict JSON only, in this exact shape:
   "characters": [{ "name": "", "appearance": "one-line English summary",
     "traits": { "age": "", "build": "", "skin": "", "hair": "", "eyes": "", "outfit": "", "distinctive": "" } }],
   "locations": [{ "name": "", "description": "" }],
-  "storyObject": { "name": "", "description": "", "secretContent": "", "plantedInPanels": [2, 3] },
+  "storyObject": { "name": "", "description": "", "scale": "", "secretContent": "", "plantedInPanels": [2, 3] },
   "scenes": [{ "panelNumber": 1, "description": "", "imagePrompt": "", "characters": [""],
     "location": "", "dialogue": "" }]
 }`;
@@ -143,6 +148,14 @@ export function validateScript(script: ComicScript): string[] {
   for (const s of script.scenes) {
     for (const n of s.characters) {
       if (!names.has(n.toLowerCase())) problems.push(`panel ${s.panelNumber} names unknown character "${n}"`);
+    }
+    // A line without "Name:" is lettered as narration, not as a bubble — in The
+    // Golden Find a character's "Look at these crates" came out as a caption box.
+    for (const line of (s.dialogue ?? "").split("|").map((l) => l.trim()).filter(Boolean)) {
+      const speaker = line.match(/^([^:]{1,40}):/)?.[1].replace(/\([^)]*\)/, "").trim().toLowerCase();
+      if (!speaker || !names.has(speaker)) {
+        problems.push(`panel ${s.panelNumber} has a dialogue line with no known speaker: "${line}" — start it with the character's name and a colon`);
+      }
     }
     if (s.location && !places.has(s.location.toLowerCase())) {
       problems.push(`panel ${s.panelNumber} uses undeclared location "${s.location}"`);
@@ -192,6 +205,7 @@ export function toBible(script: ComicScript): ComicBible {
     storyObject: {
       name: script.storyObject.name,
       description: script.storyObject.description,
+      scale: script.storyObject.scale,
       plantedInPanels: script.storyObject.plantedInPanels,
     },
   };
