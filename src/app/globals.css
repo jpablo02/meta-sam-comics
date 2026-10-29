@@ -450,7 +450,8 @@ img, video { max-width: 100%; display: block; }
   inset: 0;
   background:
     radial-gradient(60% 45% at 50% 48%, rgba(11, 13, 23, 0.55) 0%, rgba(11, 13, 23, 0.15) 70%, transparent 100%),
-    linear-gradient(180deg, rgba(11, 13, 23, 0.25) 0%, transparent 30%, transparent 60%, rgba(11, 13, 23, 0.85) 100%);
+    linear-gradient(180deg, rgba(11, 13, 23, 0.25) 0%, transparent 30%, transparent 60%, rgba(11, 13, 23, 0.85) 100%),
+    rgba(11, 13, 23, 0.3);
 }
 
 /* Golden motes rising out of the book. */
