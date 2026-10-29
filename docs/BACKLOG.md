@@ -28,28 +28,44 @@ Done on `feat/polish-round-1`:
 
 ## Next
 
-- [ ] **Gem consistency across panels.** The bottle changes size between
-      panels; in one, the paper sits on top of the cork instead of inside.
-      Proposal: draw the gem once as an **object sheet** before the panels and
-      pass it as a reference to every panel that plants it — the same thing the
-      character portraits do for faces (Token Comic does it with set sheets).
-- [ ] **The reel to publish.** Today's reel is the *SAM spotlight* reel: it
-      dims the panel and outlines the object — great to show the judges how the
-      gem is found, not what a reader posts. Proposal: two reels —
-      **story reel** (clean panels, gentle motion, bubbles, end card with the
-      blurred gem and "Collect it on Tales") for sharing, and the spotlight reel
-      kept for the demo video.
-- [ ] **A line with no speaker became a narration box** ("Look at these crates.
-      Illegal rifles." in The Golden Find, panel 2). Check the script's
-      dialogue format for that panel.
-- [ ] **Phone testing.** `localhost` only exists on the computer. Needs an HTTPS
-      tunnel (or the deploy) and that URL added to the Facebook app.
+## Round 2 — done on `feat/gem-sheet`
+
+- [x] **Gem object sheet.** The gem is drawn once (shape, materials, real size
+      against a hand, where its contents sit) and passed as the LAST reference
+      to every panel that plants it, and to the teaser card.
+- [x] **Two reels.** `reel.mp4` is now the **story reel** for sharing (title
+      card, slow top-anchored push-in per panel, crossfades, end card with the
+      blurred gem and "Collect it on Tales"). The **spotlight reel** stays as
+      `reel-spotlight.mp4` for the demo video. A downward pan was tried first and
+      cut the top bubble off every panel.
+- [x] **Every dialogue line must name its speaker** — checked when the script is
+      validated, sent back to Muse Spark to fix before anything is drawn.
+- [x] **Shared bubble in the demo** ("…net brought! Ramiro: No…"): the demo
+      panels predated the parser fix; re-lettered with `scripts/reletter.ts`.
+
+## Next
+
+- [ ] **Landing artwork made for it.** No real comic behind the pitch: one
+      commissioned hero image (Muse Image), high resolution, plus a section that
+      explains what Tales is for whoever wants to dig in. Soften the copy — less
+      explicit than "a letter, a key, a dagger".
+- [ ] **A cover per comic**, different from its panels: a dedicated cover image
+      (title space, the cast, the gem hinted) drawn at the end of the pipeline.
+- [ ] **Bubbles vs. a caption strip — to discuss.** Option: dialogue in a strip
+      under each panel instead of bubbles on the art. Pros: no placement fights,
+      never covers faces or the gem, always in order. Cons: reads less like a
+      comic, the art shrinks, a judge may read it as a shortcut. Middle ground:
+      keep bubbles, fall back to the strip only when a panel has no good spot.
 - [ ] More UX passes from the owner's testing.
 
 ## Waiting on a decision
 
-- [ ] **Architecture**: Cloud Run job + Vercel, or one container. Check the
-      contest rules on Google services first.
+- [ ] **Architecture** — owner leans to Google Cloud + Vercel + the domain
+      already paid for Token Comic; Railway is out. Recommendation in the next
+      section of the chat: Vercel (web) + Cloud Run Job (pipeline) + Cloud
+      Storage (files) + Postgres (comics, collections). Check the contest rules
+      on Google services first.
+- [ ] **Phone testing** — after the deploy, not with temporary tunnels (owner's call).
 - [ ] **Database** for comics and collections (the local `data/` folder is the
       demo store; `store.ts` is the only file that changes).
 - [ ] **Facebook app Live mode**: privacy URL, data-deletion URL, 1024×1024
