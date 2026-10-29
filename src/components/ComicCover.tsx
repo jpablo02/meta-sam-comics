@@ -1,11 +1,13 @@
 import Link from "next/link";
 import type { StoredComic } from "@/lib/store";
 import { comicPath, facebookShareUrl, fileUrl } from "@/lib/urls";
-import { PanelStrip } from "./PanelStrip";
 import { Avatar, BookIcon, GemIcon, PlayIcon, ShareIcon, timeAgo } from "./ui";
 
-/** A comic as a post: author, title, swipeable panels, and its gem waiting below. */
-export function ComicPost({ comic, collected }: { comic: StoredComic; collected: number }) {
+/**
+ * A comic in the feed: its cover, not the comic. Reading happens on the comic's
+ * own page, top to bottom — the feed only has to make you want to open it.
+ */
+export function ComicCover({ comic, collected }: { comic: StoredComic; collected: number }) {
   const left = Math.max(0, comic.gem.supply - collected);
   const href = comicPath(comic.id);
 
@@ -17,30 +19,22 @@ export function ComicPost({ comic, collected }: { comic: StoredComic; collected:
           <span className="post-author">
             {comic.author.name} <span>made a comic</span>
           </span>
-          <span className="post-meta">
-            {timeAgo(comic.createdAt)} · {comic.seriesTitle}
-          </span>
+          <span className="post-meta">{timeAgo(comic.createdAt)}</span>
         </div>
       </div>
 
-      <div className="post-body">
-        <h2 className="post-title">
-          <Link href={href}>{comic.chapterTitle}</Link>
-        </h2>
-        {comic.logline}
-      </div>
+      <div className="post-body">{comic.logline}</div>
 
-      <PanelStrip panels={comic.panels.map((p) => fileUrl(comic.id, p, 720))} alt={comic.chapterTitle} />
-
-      <Link href={href} className="gem-row">
-        <span className="gem-icon">
-          <GemIcon />
-        </span>
-        <span>
-          <strong>A gem is hidden in this story.</strong>
-          <br />
-          {left > 0 ? `${left} of ${comic.gem.supply} left to collect` : "All copies collected"}
-        </span>
+      <Link href={href} className="cover" aria-label={`Read ${comic.chapterTitle}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={fileUrl(comic.id, comic.panels[0], 720)} alt="" />
+        <div className="cover-text">
+          <span className="cover-series">{comic.seriesTitle}</span>
+          <span className="cover-title">{comic.chapterTitle}</span>
+          <span className="cover-meta">
+            {comic.panels.length} panels · <GemIcon size={14} /> {left > 0 ? `${left} gems left` : "all gems collected"}
+          </span>
+        </div>
       </Link>
 
       <div className="actions">

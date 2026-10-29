@@ -11,8 +11,8 @@ const WIDTHS = new Set([360, 720, 1080]);
 /**
  * Serve one of a comic's files.
  *
- * The collector's card is the only guarded file: it is served to the author
- * and to people who collected the gem, nobody else — that is the whole product.
+ * The collector's card is the only guarded file: it is served to people who
+ * collected the gem, the author included, nobody else — that is the whole product.
  * Everything else is public, as the comic is. `?w=` returns a resized WebP
  * (cached next to the original) so the feed does not download 5 MB PNGs.
  */
@@ -22,11 +22,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const comic = await getComic(id).catch(() => null);
   if (comic) {
-    const allowed = [...comic.panels, comic.reel, comic.gem.teaser, comic.gem.revealed];
+    const allowed = [...comic.panels, comic.reel, comic.spotlightReel, comic.gem.teaser, comic.gem.revealed].filter(Boolean);
     if (!allowed.includes(name)) return new Response("Not found", { status: 404 });
     if (name === comic.gem.revealed) {
       const user = await currentUser();
-      const mayRead = user && (user.id === comic.author.id || (await findCollection(id, user.id)));
+      const mayRead = user && (await findCollection(id, user.id));
       if (!mayRead) return new Response("Collect the gem to read it", { status: 403 });
     }
   } else {

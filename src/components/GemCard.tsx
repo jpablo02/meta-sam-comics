@@ -33,7 +33,9 @@ export function GemCard(props: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canRead = props.isAuthor || myNumber !== null;
+  // The author collects like anyone else: the reveal is the moment, and their
+  // own copy belongs in their collection with a number.
+  const canRead = myNumber !== null;
   const left = Math.max(0, props.supply - collected);
   const soldOut = left === 0 && myNumber === null;
 
@@ -65,7 +67,7 @@ export function GemCard(props: Props) {
     headline = props.gemName;
   } else if (props.isAuthor) {
     label = "Your story's gem";
-    headline = props.gemName;
+    headline = "Collect the first copy of your own gem.";
   }
 
   return (

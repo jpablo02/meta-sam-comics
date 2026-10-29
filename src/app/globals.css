@@ -417,52 +417,161 @@ img, video { max-width: 100%; display: block; }
 .step.now .step-mark { border-color: var(--accent); border-top-color: transparent; animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Landing ────────────────────────────────────────────────────────── */
+/* ── Landing (signed out) ───────────────────────────────────────────── */
 
-.hero {
+.landing {
   position: relative;
-  overflow: hidden;
   min-height: 100svh;
-  color: #fff;
+  overflow: hidden;
   background: #0b0d17;
+  color: #fff;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px 72px;
 }
-.hero-art {
+.landing a { color: #fff3d6; }
+
+/* The world behind the pitch breathes: a slow push-in and back. */
+.landing-art { position: absolute; inset: 0; }
+.landing-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: breathe 22s ease-in-out infinite alternate;
+  transform-origin: 50% 45%;
+}
+@keyframes breathe { from { transform: scale(1); } to { transform: scale(1.07); } }
+
+/* Darken the edges and the bottom so the text and the button always read. */
+.landing-shade {
   position: absolute;
   inset: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
-  opacity: 0.55;
+  background:
+    radial-gradient(60% 45% at 50% 48%, rgba(11, 13, 23, 0.55) 0%, rgba(11, 13, 23, 0.15) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(11, 13, 23, 0.25) 0%, transparent 30%, transparent 60%, rgba(11, 13, 23, 0.85) 100%),
+    rgba(11, 13, 23, 0.3);
 }
-.hero-art img { width: 100%; height: 100%; object-fit: cover; }
-.hero::after {
-  content: "";
+
+/* Golden motes rising out of the book. */
+.landing-motes { position: absolute; inset: 0; pointer-events: none; }
+.landing-motes span {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(8, 10, 20, 0.2) 0%, rgba(8, 10, 20, 0.75) 55%, rgba(8, 10, 20, 0.95) 100%);
+  bottom: -10px;
+  border-radius: 999px;
+  background: #ffd27a;
+  box-shadow: 0 0 8px 2px rgba(255, 196, 92, 0.7);
+  opacity: 0;
+  animation-name: rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
-.hero-content {
+@keyframes rise {
+  0% { transform: translate(0, 0); opacity: 0; }
+  10% { opacity: 0.9; }
+  80% { opacity: 0.6; }
+  100% { transform: translate(var(--drift), -105svh); opacity: 0; }
+}
+
+.landing-content {
   position: relative;
   z-index: 1;
-  margin-top: auto;
-  padding: 32px 16px 40px;
-  max-width: 520px;
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 560px;
+  text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
 }
-.hero h1 { margin: 0; font-size: clamp(44px, 12vw, 72px); line-height: 0.95; letter-spacing: -2px; }
-.hero p { margin: 0; font-size: 18px; color: rgba(255, 255, 255, 0.85); }
-.hero .glass { max-width: none; margin: 0; }
-.hero a { color: #cfe0ff; }
+
+/* A sheen crosses the title every few seconds. */
+.landing-title {
+  margin: 0;
+  font-size: clamp(76px, 20vw, 136px);
+  line-height: 0.9;
+  font-weight: 800;
+  letter-spacing: -4px;
+  color: transparent;
+  background:
+    linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.95) 50%, transparent 60%) no-repeat,
+    linear-gradient(180deg, #ffffff 35%, #ffd27a 115%);
+  background-size: 250% 100%, 100% 100%;
+  background-position: 150% 0, 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 4px 22px rgba(0, 0, 0, 0.5));
+  animation: sheen 7s ease-in-out infinite;
+}
+@keyframes sheen {
+  0%, 70% { background-position: 150% 0, 0 0; }
+  100% { background-position: -50% 0, 0 0; }
+}
+
+.landing-tagline { margin: 0; font-size: clamp(22px, 5.5vw, 30px); font-weight: 700; letter-spacing: -0.4px; }
+.landing-sub { margin: 0; font-size: 17px; color: rgba(255, 255, 255, 0.9); max-width: 420px; }
+
+.landing-actions { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+.landing-actions .button {
+  min-height: 52px;
+  font-size: 17px;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(8, 102, 255, 0.45);
+}
+.landing-example { font-weight: 600; }
+
+.landing-legal {
+  position: absolute;
+  z-index: 1;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-art img, .landing-motes span, .landing-title { animation: none; }
+}
 
 .gems-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 @media (min-width: 560px) { .gems-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .gem-tile { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: inherit; }
 .gem-tile img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 12px; }
 .gem-tile strong { font-size: 14px; line-height: 1.25; }
+
+/* ── Feed cover ─────────────────────────────────────────────────────── */
+
+.cover {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #0b0d17;
+  color: #fff;
+  text-decoration: none;
+}
+.cover img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform 0.6s ease; }
+.cover:hover img { transform: scale(1.02); }
+.cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(8, 10, 20, 0.88) 100%);
+}
+.cover-text {
+  position: absolute;
+  z-index: 1;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cover-series { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #ffd27a; }
+.cover-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; }
+.cover-meta { font-size: 13px; color: rgba(255, 255, 255, 0.8); display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }

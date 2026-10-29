@@ -2,15 +2,17 @@
  * From a reader's idea to a comic with a collectible inside it.
  *
  *   idea ─ Muse Spark ──▶ script (cast, places, 4 scenes, story object + its secret)
- *        ─ Muse Image ──▶ one portrait per character
- *        ─ Muse Image ──▶ 4 vertical panels, each anchored on the portraits in it
+ *        ─ Muse Image ──▶ one portrait per character + one sheet of the story object
+ *        ─ Muse Image ──▶ 4 vertical panels, each anchored on the portraits and the
+ *                         object sheet of what appears in it
  *        ─ Muse Wonder + SAM 3.1 ──▶ the object, found in every panel the script plants it
  *        ─ Muse Wonder ──▶ its name as drawn, and what happened to it
  *        ─ Muse Wonder + SAM 3.1 ──▶ speech bubbles: every speaker's face found, the
  *                                    dialogue placed around faces and the object
  *        ─ Muse Spark ──▶ what it says: a teaser, and the revealed text
  *        ─ Muse Image ──▶ the collectible: teaser card + revealed card
- *        ─ (local) ─────▶ the reel: the chapter with the object in a spotlight
+ *        ─ (local) ─────▶ two reels: the story reel to share, and the spotlight
+ *                         reel that shows where SAM found the gem
  *
  * Every step reports progress through `onStep`, driven by real completion — the
  * UI shows what has actually finished, not a timer.
@@ -19,11 +21,12 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
 import { writeScript, toBible, toChapter, type ComicScript } from "./writeScript";
-import { drawPortraits, drawPanel, type PanelRung } from "./drawPanels";
+import { drawObjectSheet, drawPortraits, drawPanel, type PanelRung } from "./drawPanels";
 import { locateInPanel, describeJourney, type Sighting, type Journey } from "./locateObject";
 import { writeContents, type ObjectContents } from "./writeContents";
 import { revealTeaser, revealContents } from "./revealObject";
 import { buildReel } from "./buildReel";
+import { buildStoryReel } from "./storyReel";
 import { bakeBubbles, type Box } from "./bubbles";
 
 export type Step =
@@ -53,7 +56,10 @@ export interface ComicResult {
   teaserPath: string;
   /** Collector's card: the object with its text. */
   revealedPath: string;
+  /** Spotlight reel: each panel dimmed around the gem — how SAM found it. */
   reelPath: string;
+  /** Story reel: the one a reader shares. */
+  storyReelPath: string;
 }
 
 export interface RunOptions {
@@ -77,14 +83,15 @@ export async function runComic(idea: string, workDir: string, options: RunOption
   const bible = toBible(script);
 
   step("portraits", script.characters.map((c) => c.name).join(", "));
-  const portraitMap = await drawPortraits(bible, workDir);
+  // The cast and the gem are drawn once each, side by side; every panel copies them.
+  const [portraitMap, objectSheet] = await Promise.all([drawPortraits(bible, workDir), drawObjectSheet(bible, workDir)]);
 
   const panels: string[] = [];
   const panelRungs: PanelRung[] = [];
   for (const scene of script.scenes) {
     step("panels", `${scene.panelNumber}/${script.scenes.length}`);
     const out = join(workDir, `panel-${scene.panelNumber}.webp`);
-    panelRungs.push(await drawPanel(scene, bible, portraitMap, out));
+    panelRungs.push(await drawPanel(scene, bible, portraitMap, out, objectSheet));
     panels.push(await toPng(out));
   }
 
@@ -136,12 +143,23 @@ export async function runComic(idea: string, workDir: string, options: RunOption
   // Reveal from the sighting SAM and Wonder were surest about.
   const best = sightings.reduce((a, b) => (b.confidence > a.confidence ? b : a));
   const reveal = { objectName: script.storyObject.name };
-  const teaserPath = await toPng(await revealTeaser(best.cropPath, join(workDir, "collectible-teaser.webp"), reveal));
+  const teaserPath = await toPng(await revealTeaser(best.cropPath, join(workDir, "collectible-teaser.webp"), reveal, objectSheet));
   const revealedPath = await toPng(
-    await revealContents(best.cropPath, join(workDir, "collectible-revealed.webp"), reveal, contents),
+    await revealContents(best.cropPath, join(workDir, "collectible-revealed.webp"), reveal, contents, teaserPath),
   );
 
   step("reel");
+  // Two reels: the one a reader posts, and the spotlight one that shows how SAM
+  // found the gem (for the demo, not for a feed).
+  const storyReelPath = await buildStoryReel(
+    {
+      seriesTitle: script.seriesTitle,
+      chapterTitle: script.chapterTitle,
+      panels: lettered.map((path, i) => ({ path, dialogue: script.scenes[i]?.dialogue ?? "" })),
+      teaserPath,
+    },
+    workDir,
+  );
   const reelPath = await buildReel(
     lettered.map((path, i) => ({ path, sighting: sightings.find((s) => s.panelNumber === i + 1)?.appearance })),
     teaserPath,
@@ -161,5 +179,6 @@ export async function runComic(idea: string, workDir: string, options: RunOption
     teaserPath,
     revealedPath,
     reelPath,
+    storyReelPath,
   };
 }

@@ -120,6 +120,15 @@ function font(): opentype.Font {
 }
 
 /**
+ * One line of Comic Neue as SVG path data, centred on `cx`. Glyph outlines, not
+ * <text>: the server that renders the reel may have no fonts installed.
+ */
+export function centredTextPath(text: string, cx: number, baseline: number, size: number): string {
+  const width = font().getAdvanceWidth(text, size);
+  return font().getPath(text, cx - width / 2, baseline, size).toPathData(2);
+}
+
+/**
  * Wrap, then rebalance: narrow the measure for as long as the line count holds,
  * so "Grandpa! I brought your / lunch!" becomes "Grandpa! I brought / your lunch!".
  * A lone word on the last line reads as a mistake.

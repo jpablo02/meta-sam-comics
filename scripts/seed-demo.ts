@@ -9,7 +9,9 @@
 import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import sharp from "sharp";
+import { buildReel } from "../src/lib/buildReel";
 import type { ComicResult } from "../src/lib/pipeline";
+import { buildStoryReel } from "../src/lib/storyReel";
 import type { StoredComic } from "../src/lib/store";
 
 const runDir = process.argv[2] ?? join("tmp", "run");
@@ -28,7 +30,27 @@ async function main() {
 
   const panels = [];
   for (const p of r.lettered) panels.push(await webp(p));
-  await copyFile(join(runDir, basename(r.reelPath)), join(out, "reel.mp4"));
+
+  // Both reels rebuilt from the lettered panels on disk, so a re-lettering
+  // (scripts/reletter.ts) reaches them too. No model calls.
+  const lettered = r.lettered.map((p) => join(runDir, basename(p)));
+  const teaser = join(runDir, basename(r.teaserPath));
+  const story = await buildStoryReel(
+    {
+      seriesTitle: r.script.seriesTitle,
+      chapterTitle: r.script.chapterTitle,
+      panels: lettered.map((path, i) => ({ path, dialogue: r.script.scenes[i]?.dialogue ?? "" })),
+      teaserPath: teaser,
+    },
+    runDir,
+  );
+  const spotlight = await buildReel(
+    lettered.map((path, i) => ({ path, sighting: r.sightings.find((s) => s.panelNumber === i + 1)?.appearance })),
+    teaser,
+    runDir,
+  );
+  await copyFile(story, join(out, "reel.mp4"));
+  await copyFile(spotlight, join(out, "reel-spotlight.mp4"));
 
   const comic: StoredComic = {
     id,
@@ -40,6 +62,7 @@ async function main() {
     logline: r.script.logline,
     panels,
     reel: "reel.mp4",
+    spotlightReel: "reel-spotlight.mp4",
     gem: {
       name: r.script.storyObject.name,
       teaser: await webp(r.teaserPath),

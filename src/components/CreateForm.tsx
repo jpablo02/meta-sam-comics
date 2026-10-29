@@ -3,13 +3,38 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-/** Two fields, on purpose: the story, and — if the writer has one in mind — the gem. */
+/**
+ * Two fields, both required: the story, and its gem. Every story has one — when
+ * the writer has none in mind, "Suggest one" asks Muse Spark for it.
+ */
 export function CreateForm() {
   const router = useRouter();
   const [idea, setIdea] = useState("");
   const [gemHint, setGemHint] = useState("");
   const [busy, setBusy] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const ideaReady = idea.trim().length >= 20;
+
+  async function suggest() {
+    setSuggesting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/suggest-gem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idea }),
+      });
+      const data = await res.json();
+      if (!res.ok) setError(data.error ?? "Could not suggest one right now.");
+      else setGemHint(data.gem);
+    } catch {
+      setError("Could not suggest one right now.");
+    } finally {
+      setSuggesting(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,22 +76,36 @@ export function CreateForm() {
       </div>
 
       <div className="field">
-        <label htmlFor="gem">The gem (optional)</label>
-        <input
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <label htmlFor="gem">The gem</label>
+          <button
+            type="button"
+            className="button secondary small"
+            onClick={suggest}
+            disabled={!ideaReady || suggesting}
+            title={ideaReady ? undefined : "Write the story first"}
+          >
+            {suggesting ? "Thinking…" : "✨ Suggest one"}
+          </button>
+        </div>
+        <textarea
           id="gem"
+          rows={2}
           value={gemHint}
           onChange={(e) => setGemHint(e.target.value)}
           placeholder="The letter inside the bottle — what it says changes everything"
           maxLength={300}
+          required
         />
         <span className="field-hint">
-          An object in the story worth keeping. Everyone will see it; only people who collect it read what it hides.
+          The object hidden in your story. Everyone will see it; only people who collect it read what it says. No
+          idea? Write the story and tap Suggest one.
         </span>
       </div>
 
       {error && <p className="error" style={{ margin: 0 }}>{error}</p>}
 
-      <button type="submit" className="button block" disabled={busy || idea.trim().length < 20}>
+      <button type="submit" className="button block" disabled={busy || !ideaReady || gemHint.trim().length < 3}>
         {busy ? "Starting…" : "Make my comic"}
       </button>
     </form>
