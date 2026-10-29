@@ -14,7 +14,10 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const [user, comics] = await Promise.all([currentUser(), listComics()]);
 
-  if (!user) return <Landing comics={comics} providers={availableProviders()} />;
+  if (!user) {
+    const example = comics.find((c) => c.author.id === "demo") ?? comics[0];
+    return <Landing providers={availableProviders()} exampleId={example?.id} />;
+  }
 
   const counts = await Promise.all(comics.map((c) => collectedCount(c.id)));
   const firstName = user.name.split(/\s+/)[0];
