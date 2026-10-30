@@ -1,0 +1,13 @@
+# Same as .dockerignore: only what the worker image needs is uploaded.
+node_modules/
+.next/
+data/
+demo/
+tmp/
+public/
+docs/
+.env
+.env.*
+.git/
+.vercel/
+*.tsbuildinfo

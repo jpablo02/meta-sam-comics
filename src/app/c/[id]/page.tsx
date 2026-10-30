@@ -86,7 +86,8 @@ export default async function ComicPage({ params }: Params) {
             {comic.logline}
           </div>
 
-          {/* Read top to bottom, like a webtoon: one panel per screen on a phone. */}
+          {/* Read top to bottom, like a webtoon: one panel per screen on a phone. The cover
+              stays in the feed and the reel — opening the comic from it starts the story. */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {comic.panels.map((p, i) => (
               // eslint-disable-next-line @next/next/no-img-element

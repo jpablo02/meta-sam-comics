@@ -1,8 +1,6 @@
-import { readFile, stat, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import sharp from "sharp";
-import { comicDir, findCollection, getComic, getStatus } from "@/lib/store";
+import { findCollection, getComic, getStatus } from "@/lib/store";
+import { blobInfo, readBlob, signedUrl, writeBlob } from "@/lib/blobs";
 import { currentUser } from "@/lib/session";
 
 const TYPES: Record<string, string> = { png: "image/png", webp: "image/webp", mp4: "video/mp4" };
@@ -22,7 +20,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const comic = await getComic(id).catch(() => null);
   if (comic) {
-    const allowed = [...comic.panels, comic.reel, comic.spotlightReel, comic.gem.teaser, comic.gem.revealed].filter(Boolean);
+    const allowed = [...comic.panels, comic.cover, comic.reel, comic.spotlightReel, comic.gem.teaser, comic.gem.revealed].filter(Boolean);
     if (!allowed.includes(name)) return new Response("Not found", { status: 404 });
     if (name === comic.gem.revealed) {
       const user = await currentUser();
@@ -35,8 +33,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     if (!status || !/^panel-\d\.png$/.test(name)) return new Response("Not found", { status: 404 });
   }
 
-  const path = join(comicDir(id), name);
-  if (!existsSync(path)) return new Response("Not found", { status: 404 });
+  const info = await blobInfo(id, name);
+  if (!info) return new Response("Not found", { status: 404 });
 
   const ext = name.split(".").pop() ?? "";
   const search = new URL(req.url).searchParams;
@@ -44,26 +42,44 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   // JPEG for link previews: not every crawler reads WebP.
   const jpg = search.get("f") === "jpg";
   const privateFile = comic && name === comic.gem.revealed;
-  const cache = privateFile ? "private, no-store" : "public, max-age=3600";
+  const resize = WIDTHS.has(w) && ext !== "mp4";
 
-  if (WIDTHS.has(w) && ext !== "mp4") {
-    const resized = `${path}.w${w}.${jpg ? "jpg" : "webp"}`;
+  // A function's response tops out at 4.5 MB on Vercel and a reel is ~6 MB: a
+  // public file at full size goes straight from storage, through a short-lived
+  // link (which also lets the video seek). The collector's card never does.
+  if (!resize && !privateFile) {
+    const url = await signedUrl(id, name);
+    if (url) return Response.redirect(url, 302);
+  }
+
+  // Revalidate every time: a file can be redrawn under the same name (a remade
+  // demo, a repaired panel), and a max-age kept showing the old art for an hour.
+  // The ETag makes the check a cheap 304 when nothing changed.
+  const cache = privateFile ? "private, no-store" : "public, no-cache";
+  const etag = `"${Math.round(info.mtimeMs).toString(36)}-${info.size.toString(36)}-${w || 0}${jpg ? "j" : ""}"`;
+  if (!privateFile && req.headers.get("if-none-match") === etag) {
+    return new Response(null, { status: 304, headers: { ETag: etag, "Cache-Control": cache } });
+  }
+
+  if (resize) {
+    const resized = `${name}.w${w}.${jpg ? "jpg" : "webp"}`;
+    const cached = await blobInfo(id, resized);
     let body: Buffer;
-    if (existsSync(resized)) {
-      body = await readFile(resized);
+    // A resized copy older than its original is a copy of the old art.
+    if (cached && cached.mtimeMs >= info.mtimeMs) {
+      body = await readBlob(id, resized);
     } else {
-      const img = sharp(path).resize({ width: w });
+      const img = sharp(await readBlob(id, name)).resize({ width: w });
       body = await (jpg ? img.jpeg({ quality: 85 }) : img.webp({ quality: 82 })).toBuffer();
       // Read-only disks (the shipped demo on a host) just skip the cache.
-      await writeFile(resized, body).catch(() => {});
+      await writeBlob(id, resized, body, jpg ? "image/jpeg" : "image/webp").catch(() => {});
     }
     return new Response(new Uint8Array(body), {
-      headers: { "Content-Type": jpg ? "image/jpeg" : "image/webp", "Cache-Control": cache },
+      headers: { "Content-Type": jpg ? "image/jpeg" : "image/webp", "Cache-Control": cache, ETag: etag },
     });
   }
 
-  const { size } = await stat(path);
-  return new Response(new Uint8Array(await readFile(path)), {
-    headers: { "Content-Type": TYPES[ext] ?? "application/octet-stream", "Content-Length": String(size), "Cache-Control": cache },
+  return new Response(new Uint8Array(await readBlob(id, name)), {
+    headers: { "Content-Type": TYPES[ext] ?? "application/octet-stream", "Content-Length": String(info.size), "Cache-Control": cache, ETag: etag },
   });
 }

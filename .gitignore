@@ -38,3 +38,5 @@ data/
 *.w360.jpg
 *.w720.jpg
 *.w1080.jpg
+# Story-reel intermediates
+story-*.png

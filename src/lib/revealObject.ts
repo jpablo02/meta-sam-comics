@@ -30,6 +30,8 @@ export const COLLECTIBLE_SIZE = "1024x1536";
 export interface RevealOptions {
   /** What the object is, in the story's words. */
   objectName: string;
+  /** What it is made of and where its contents sit — "a letter rolled INSIDE the bottle". */
+  description?: string;
   /** Art direction for the display piece. */
   treatment?: string;
 }
@@ -38,10 +40,15 @@ const DEFAULT_TREATMENT =
   "floating alone against a dark atmospheric background that echoes the story's world, " +
   "dramatic rim lighting, premium collectible presentation";
 
-function basePrompt({ objectName, treatment }: RevealOptions): string[] {
+function basePrompt({
+  objectName,
+  description,
+  treatment,
+}: RevealOptions): string[] {
   return [
     `The exact same ${objectName} shown in the reference image, presented as a collectible:`,
     treatment?.trim() || DEFAULT_TREATMENT,
+    description ? `What it is: ${description}` : "",
     "Keep the same object: same shape, same material, same wear and damage, same colours.",
     "It is shown flat and front-facing, filling most of the frame. No hands, no people.",
   ];
@@ -61,17 +68,36 @@ export async function revealTeaser(
 ): Promise<string> {
   const prompt = [
     ...basePrompt(options),
-    objectSheet
-      ? "The second reference image is the clean reference sheet of this same object: match its shape, materials and how its parts fit."
-      : "",
+    "Its contents sit exactly where the reference shows them — nothing moves from inside to outside.",
     "Its contents are present but NOT readable: the writing is blurred, faded, scorched or",
     "partly covered by shadow, so the viewer can tell there is a message and cannot read a",
     "single word of it.",
   ]
     .filter(Boolean)
     .join(" ");
-  const references = objectSheet ? [cropPath, objectSheet] : [cropPath];
-  return generateWithReferences(prompt, references, COLLECTIBLE_SIZE, outPath);
+  // The sheet alone when there is one. Given the crop first and the sheet second,
+  // the Tide of Secrets card kept the crop's glare and lost the barnacles, and
+  // stuck the letter on the OUTSIDE of the bottle as a label. The crop is the
+  // last resort, when the sheet keeps being refused.
+  const tries = objectSheet ? [[objectSheet], [objectSheet], [cropPath]] : [[cropPath], [cropPath]];
+  return untilAccepted("teaser", tries, (refs) => generateWithReferences(prompt, refs, COLLECTIBLE_SIZE, outPath));
+}
+
+/**
+ * Muse Image's filter refuses at random: on a bronze key with nothing sensitive
+ * in it, the same teaser request passed, failed, then passed again. Two of three
+ * test comics died on the teaser, the last step of seven minutes. A refusal gets
+ * the next set of references; anything else fails at once.
+ */
+async function untilAccepted(label: string, tries: string[][], draw: (refs: string[]) => Promise<string>): Promise<string> {
+  for (let i = 0; ; i++) {
+    try {
+      return await draw(tries[i]);
+    } catch (err) {
+      if (i === tries.length - 1 || !/\((400|422)\)/.test(String(err))) throw err;
+      console.warn(`[${label}] refused (${i + 1}/${tries.length}) — trying again: ${String(err).slice(0, 160)}`);
+    }
+  }
 }
 
 /**
@@ -98,19 +124,37 @@ export async function revealContents(
    * letters", it set a glowing serif caption over a dagger's blade — legible,
    * and plainly pasted on.
    */
-  const lines = [contents.title, ...contents.revealed].map((l) => l.trim()).filter(Boolean);
+  const lines = [contents.title, ...contents.revealed]
+    .map((l) => l.trim())
+    .filter(Boolean);
+  // The fallback once had a beige studio backdrop where the teaser was dark smoke:
+  // the background has to be named as part of what stays.
   const staging = teaserPath
     ? [
-        `Reference image 1 is a collectible card of a ${options.objectName}. Reproduce it exactly — same`,
-        "object, same pose, same composition, background, lighting and colours — changing ONE thing:",
-        "the writing on the object is now sharp and readable.",
-        `Reference image 2 shows the same ${options.objectName} as it appears in the story; use it only`,
-        "to keep the object faithful.",
+        `The reference image is a collectible card of a ${options.objectName}. Reproduce it exactly — same`,
+        "object, same pose, same framing, the SAME dark background, the same lighting and colours —",
+        "changing ONE thing: the writing on the object is now sharp and readable. Add nothing: no",
+        "frame, no border, no mount, no new or lighter background.",
       ]
-    : [...basePrompt(options), "Every line written on it must be sharp and readable."];
+    : [
+        ...basePrompt(options).filter(Boolean),
+        "Every line written on it must be sharp and readable.",
+      ];
+  // Where the words go. Told only "the text is part of the object", the bottle's
+  // letter was written across the glass instead of on the paper inside it.
+  const where = options.description
+    ? [
+        "",
+        `What the object is: ${options.description}`,
+        "The text goes on the part that carries the message, where the description puts it — the back",
+        "of a ticket, the inside of a watch lid, a dagger's blade, a letter's paper (read through the",
+        "glass when it is inside a bottle) — never moved onto some other surface of the object.",
+      ]
+    : [];
 
   const prompt = [
     ...staging,
+    ...where,
     "",
     "Write EXACTLY the text between the markers on the object, line by line as given — no",
     "extra words, no labels, no bullet points, no quotation marks:",
@@ -127,7 +171,11 @@ export async function revealContents(
     "The lettering follows the surface's shape, perspective and curvature, sized to fit it, in a",
     "style true to the object's era. It is NOT a caption: no glow, no light coming from the letters,",
     "no text box, no flat overlay, no lettering floating in front of the object.",
+    "Each line appears once — no word repeated.",
   ].join("\n");
-  const references = teaserPath ? [teaserPath, cropPath] : [cropPath];
-  return generateWithReferences(prompt, references, COLLECTIBLE_SIZE, outPath);
+
+  // The teaser alone: it is already drawn from the object sheet, and two-reference
+  // attempts on the Tide of Secrets remake were refused twice in a row.
+  const refs = [teaserPath ?? cropPath];
+  return untilAccepted("revealed", [refs, refs, refs], (r) => generateWithReferences(prompt, r, COLLECTIBLE_SIZE, outPath));
 }

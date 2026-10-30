@@ -149,6 +149,66 @@ export function objectSheetPrompt(object: StoryObject, bible: ComicBible): strin
     .join(". ");
 }
 
+export interface CoverInput {
+  artStyle: string;
+  logline: string;
+  /** The cast on the cover, in the order their portraits are attached. */
+  cast: Character[];
+  gemName: string;
+  /** Where the story happens, for the backdrop. */
+  setting?: string;
+  /** Whether the gem's reference image is attached after the portraits. */
+  withGemReference: boolean;
+}
+
+/**
+ * Prompt for the comic's cover — its own image, not a panel. It sells the
+ * story the way a cover does: the cast, the world, and the gem catching the
+ * light somewhere in it. The title is laid over it by the app, never drawn:
+ * lettering in the art would be one more thing to get wrong.
+ *
+ * The cast is described in words too, as on a panel. With names alone the
+ * portraits were ignored: the demo's cover came back with a stranger in a cap
+ * where Ramiro and his sombrero vueltiao should be — twice.
+ */
+export function coverPrompt(c: CoverInput): string {
+  const refs: string[] = [];
+  if (c.cast.length > 0) {
+    refs.push(
+      `The ${c.withGemReference ? `first ${c.cast.length} attached images are` : "attached images are"} ` +
+        `IDENTITY REFERENCES of the cast, one per image, in this order: ${c.cast.map((p) => p.name).join(", ")}. ` +
+        "They are NOT style inspiration. Copy each character exactly — same face, skin tone, hair color, " +
+        "length and cut, outfit and build. Take ONLY identity from them. Where the references and any text " +
+        "disagree, the REFERENCES WIN",
+      fidelityDirective(),
+      ...c.cast.map(renderCharacter),
+    );
+  }
+  if (c.withGemReference) {
+    refs.push(
+      `The ${c.cast.length > 0 ? "LAST attached image" : "attached image"} is the reference of ${c.gemName}: ` +
+        "draw that exact object",
+    );
+  }
+  return [
+    c.artStyle,
+    "A COMIC BOOK COVER illustration — one striking, iconic image that sells the whole story, not a scene from it",
+    ...refs,
+    `The story: ${c.logline}`,
+    c.setting ? `The world behind them: ${c.setting}` : "",
+    "The cast in a dramatic, characterful cover pose, larger than life, their faces in the upper half of the frame",
+    `${c.gemName} is in the image — held, half-hidden or glinting in the light — intriguing, noticed on a second look, not centre stage`,
+    // Listing "ground, water, shadow" put a puddle on a hospital floor and in a living room.
+    "The bottom fifth is calmer — the scene's own floor or ground, falling into shadow — where a title will be laid over later",
+    "Full-bleed vertical cover art filling the whole image edge to edge",
+    "Do NOT include any text, title, letters, logos, price, barcode, speech bubbles, panel borders or frame",
+  ]
+    .filter(Boolean)
+    .join(". ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /** Remove clothing/hair phrasing a script writer slipped into the scene. */
 export function stripAppearance(scene: string): string {
   return scene
@@ -229,7 +289,8 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible, withObjectShee
         `name used as a label ("${object.name}" is how the story refers to it, not text on ` +
         "it, unless it is literally its printed title). Its BODY must stay unreadable — fine " +
         "print or handwriting too small, too far, at an angle or out of focus to make out. " +
-        "Show that it has contents; do not let them be read",
+        "Show that it has contents; do not let them be read. There is exactly ONE of it in " +
+        "the panel — never a second copy lying nearby",
     );
     if (withObjectSheet) {
       parts.push(

@@ -11,7 +11,15 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { metaClient, metaFetch, MUSE_IMAGE_MODEL } from "./metaClient";
 import { MUSE_SPARK_MODEL } from "./writeContents";
-import { objectSheetPrompt, panelPrompt, portraitPrompt, type ComicBible, type PanelScene } from "./comicPrompts";
+import {
+  coverPrompt,
+  objectSheetPrompt,
+  panelPrompt,
+  portraitPrompt,
+  type ComicBible,
+  type CoverInput,
+  type PanelScene,
+} from "./comicPrompts";
 
 /**
  * Muse Image takes sizes as WxH and rounds to the nearest size it supports
@@ -94,6 +102,27 @@ export async function drawPortraits(bible: ComicBible, workDir: string): Promise
     portraits.set(character.name.toLowerCase(), out);
   }
   return portraits;
+}
+
+/**
+ * The comic's cover, anchored on the cast's portraits and the gem's reference.
+ * On a policy rejection it is drawn again without references — a cover that
+ * looks a little less like the cast beats a comic with no cover.
+ */
+export async function drawCover(
+  input: Omit<CoverInput, "withGemReference">,
+  portraits: string[],
+  gemReference: string | null,
+  outPath: string,
+): Promise<string> {
+  const refs = [...portraits, ...(gemReference ? [gemReference] : [])];
+  try {
+    return await generateWithReferences(coverPrompt({ ...input, withGemReference: Boolean(gemReference) }), refs, PORTRAIT_SIZE, outPath);
+  } catch (err) {
+    if (!isPolicyRejection(err)) throw err;
+    console.warn(`[cover] policy rejection with references — drawing without them: ${String(err).slice(0, 200)}`);
+    return generateImage(coverPrompt({ ...input, withGemReference: false }), PORTRAIT_SIZE, outPath);
+  }
 }
 
 /** The story object's reference sheet, drawn once. Null when the story has no object. */

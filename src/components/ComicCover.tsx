@@ -25,9 +25,10 @@ export function ComicCover({ comic, collected }: { comic: StoredComic; collected
 
       <div className="post-body">{comic.logline}</div>
 
-      <Link href={href} className="cover" aria-label={`Read ${comic.chapterTitle}`}>
+      {/* A real cover keeps its upper third calm for the title; a first panel does not. */}
+      <Link href={href} className={comic.cover ? "cover has-art" : "cover"} aria-label={`Read ${comic.chapterTitle}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={fileUrl(comic.id, comic.panels[0], 720)} alt="" />
+        <img src={fileUrl(comic.id, comic.cover ?? comic.panels[0], 720)} alt="" />
         <div className="cover-text">
           <span className="cover-series">{comic.seriesTitle}</span>
           <span className="cover-title">{comic.chapterTitle}</span>

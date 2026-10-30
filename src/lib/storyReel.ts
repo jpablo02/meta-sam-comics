@@ -55,15 +55,27 @@ async function backdrop(image: string): Promise<Buffer> {
     .toBuffer();
 }
 
-async function titleCard(firstPanel: string, series: string, chapter: string, out: string): Promise<void> {
-  const svg = `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${textBlock(
-    [
-      { text: series.toUpperCase(), size: 44, fill: "#ffd27a" },
-      { text: chapter, size: 92, fill: "#ffffff" },
-    ],
-    H / 2 - 120,
-  )}</svg>`;
-  await sharp(await backdrop(firstPanel)).composite([{ input: Buffer.from(svg) }]).png().toFile(out);
+/**
+ * The opening shot. With a cover, the cover itself, titled low over a shade —
+ * faces sit high on a cover, so the top is the one place a title must not go.
+ * Without one, the title over a blurred first panel.
+ */
+async function titleCard(series: string, chapter: string, out: string, firstPanel: string, cover?: string): Promise<void> {
+  const lines = [
+    { text: series.toUpperCase(), size: 44, fill: "#ffd27a" },
+    { text: chapter, size: 92, fill: "#ffffff" },
+  ];
+  if (!cover) {
+    const svg = `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${textBlock(lines, H / 2 - 120)}</svg>`;
+    await sharp(await backdrop(firstPanel)).composite([{ input: Buffer.from(svg) }]).png().toFile(out);
+    return;
+  }
+  const svg = `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0.6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.8"/>
+    </linearGradient></defs>
+    <rect width="${W}" height="${H}" fill="url(#g)"/>${textBlock(lines, H - 330)}</svg>`;
+  await sharp(cover).resize(W, H, { fit: "cover" }).composite([{ input: Buffer.from(svg) }]).png().toFile(out);
 }
 
 async function endCard(teaser: string, out: string): Promise<void> {
@@ -96,6 +108,8 @@ async function endCard(teaser: string, out: string): Promise<void> {
 export interface StoryReelInput {
   seriesTitle: string;
   chapterTitle: string;
+  /** The comic's cover, if it has one: the reel opens on it. */
+  coverPath?: string;
   /** Lettered panels, in reading order, with the dialogue each one carries. */
   panels: Array<{ path: string; dialogue: string }>;
   teaserPath: string;
@@ -107,10 +121,13 @@ export async function buildStoryReel(input: StoryReelInput, workDir: string): Pr
 
   const title = join(workDir, "story-title.png");
   const end = join(workDir, "story-end.png");
-  await titleCard(input.panels[0].path, input.seriesTitle, input.chapterTitle, title);
+  await titleCard(input.seriesTitle, input.chapterTitle, title, input.panels[0].path, input.coverPath);
   await endCard(input.teaserPath, end);
 
-  const shots: Array<{ path: string; seconds: number; move: boolean }> = [{ path: title, seconds: TITLE_SECONDS, move: false }];
+  // A cover is art: it gets the same slow push-in as the panels, and a beat longer.
+  const shots: Array<{ path: string; seconds: number; move: boolean }> = [
+    { path: title, seconds: input.coverPath ? TITLE_SECONDS + 0.8 : TITLE_SECONDS, move: Boolean(input.coverPath) },
+  ];
   for (const [i, p] of input.panels.entries()) {
     const framed = join(workDir, `story-panel-${i + 1}.png`);
     await sharp(p.path).resize(W, H, { fit: "cover" }).png().toFile(framed);
@@ -125,11 +142,14 @@ export async function buildStoryReel(input: StoryReelInput, workDir: string): Pr
    * A slow push-in anchored at the TOP edge. A downward pan was tried first and
    * cut the first bubble off by the end of every shot — bubbles sit at the top.
    * Upscaled before zoompan, which rounds to whole pixels and shakes otherwise.
+   * The trailing fps= declares the rate again: setpts leaves it unknown, and the
+   * ffmpeg 7 on the Linux worker refuses to crossfade a stream with no rate
+   * ("current rate of 1/0 is invalid") where the Windows build let it pass.
    */
   const filters = shots.map((s, i) => {
     const frames = Math.round(s.seconds * FPS);
     const move = s.move
-      ? `scale=${W * 2}:${H * 2},zoompan=z='1+${ZOOM}*on/${frames}':x='iw/2-iw/zoom/2':y=0:d=1:s=${W}x${H}:fps=${FPS},setpts=N/(${FPS}*TB),`
+      ? `scale=${W * 2}:${H * 2},zoompan=z='1+${ZOOM}*on/${frames}':x='iw/2-iw/zoom/2':y=0:d=1:s=${W}x${H}:fps=${FPS},setpts=N/(${FPS}*TB),fps=${FPS},`
       : `scale=${W}:${H},fps=${FPS},`;
     return `[${i}:v]${move}format=yuv420p,setsar=1[s${i}]`;
   });

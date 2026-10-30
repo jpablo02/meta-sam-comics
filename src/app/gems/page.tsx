@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/session";
 import { collectionsOf, getComic } from "@/lib/store";
 import { comicPath, fileUrl } from "@/lib/urls";
 import { TopBar } from "@/components/TopBar";
+import { GemShelf, type ShelfGem } from "@/components/GemShelf";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +16,19 @@ export default async function GemsPage() {
   const items = (
     await Promise.all(mine.map(async (c) => ({ c, comic: await getComic(c.comicId).catch(() => null) })))
   ).filter((x) => x.comic !== null);
+  const gems: ShelfGem[] = items.map(({ c, comic }) => ({
+    comicId: c.comicId,
+    name: comic!.gem.name,
+    number: c.number,
+    supply: comic!.gem.supply,
+    collectedAt: c.at,
+    seriesTitle: comic!.seriesTitle,
+    chapterTitle: comic!.chapterTitle,
+    image: fileUrl(c.comicId, comic!.gem.revealed, 360),
+    imageLarge: fileUrl(c.comicId, comic!.gem.revealed, 1080),
+    comicHref: comicPath(c.comicId),
+    lines: comic!.gem.revealedLines,
+  }));
 
   return (
     <>
@@ -28,18 +41,7 @@ export default async function GemsPage() {
               ? "Nothing yet. Every comic hides one — collect it to read what it says."
               : `${items.length} collected`}
           </p>
-          <div className="gems-grid">
-            {items.map(({ c, comic }) => (
-              <Link key={c.comicId} href={comicPath(c.comicId)} className="gem-tile">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={fileUrl(c.comicId, comic!.gem.revealed, 360)} alt="" />
-                <strong>{comic!.gem.name}</strong>
-                <span className="muted small">
-                  #{c.number} of {comic!.gem.supply} · {comic!.chapterTitle}
-                </span>
-              </Link>
-            ))}
-          </div>
+          <GemShelf gems={gems} />
         </section>
       </main>
     </>

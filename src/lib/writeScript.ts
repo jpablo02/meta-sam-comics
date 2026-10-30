@@ -74,6 +74,9 @@ hair colour and cut, eye colour, skin tone, build, every garment with its colour
 distinctive mark. Never "normal hair" or "casual clothes". If the idea describes a character
 (skin, build, height, clothes), those traits go in EXACTLY, even if the name resembles a famous
 character who "should" look different. Do not default everyone to slim and fair-skinned.
+The distinctive mark is something worn or carried, or a mark on the face or forearm (a scar, a
+tattoo, a gold tooth) — big enough to see in a wide shot. NEVER a missing, extra or damaged body
+part, and never on the hands or fingers: the art cannot keep those consistent from panel to panel.
 
 LOCATIONS: declare each place once with a detailed, stable visual description (architecture,
 materials, colours, defining props, lighting), so it is drawn as the same place every time.
@@ -103,6 +106,9 @@ Translate names of things, never the names of people.
 "dialogue" names who speaks, and separates speakers with " | ":
 "Camila: Look what the net brought! | Ramiro: No... I know that bottle." Short lines — each one
 fits a speech bubble. Leave it empty for a silent panel.
+When it comes naturally, let the characters call each other by name or by what they are to
+each other ("Grandpa!", "Camila, wait") so the reader learns who is who. Never bend the story
+for it: nobody appears in a panel just to say a name.
 
 "imagePrompt" describes ONLY action, camera angle, lighting and mood. Name characters, never
 describe how they look (that is injected from "traits"). Name the location in "location";
@@ -129,6 +135,9 @@ function extract(text: string): Record<string, unknown> {
   return JSON.parse(text.slice(start, end + 1));
 }
 
+/** A distinctive mark the art cannot hold from panel to panel. */
+const BODY_PART_MARK = /\b(missing|amputat\w*|stump|severed|prosthe\w*|finger\w*|pinky|thumb\w*|knuckle\w*|hands?|palm)\b/i;
+
 /**
  * Check what the rest of the pipeline relies on. A script that breaks one of
  * these would not fail here — it would fail three models later, as a panel with
@@ -144,6 +153,11 @@ export function validateScript(script: ComicScript): string[] {
   for (const c of script.characters) {
     const missing = (["age", "build", "skin", "hair", "eyes", "outfit"] as const).filter((k) => !c.traits?.[k]?.trim());
     if (missing.length) problems.push(`${c.name} is missing traits: ${missing.join(", ")}`);
+    // Ramiro's "missing tip of left pinky" came out as stubs on every finger and a
+    // fingertip floating in mid-air.
+    if (BODY_PART_MARK.test(c.traits?.distinctive ?? "")) {
+      problems.push(`${c.name}'s distinctive mark is on the hands or a missing body part: "${c.traits.distinctive}" — choose something worn, carried, or on the face or forearm`);
+    }
   }
   for (const s of script.scenes) {
     for (const n of s.characters) {
