@@ -142,11 +142,14 @@ export async function buildStoryReel(input: StoryReelInput, workDir: string): Pr
    * A slow push-in anchored at the TOP edge. A downward pan was tried first and
    * cut the first bubble off by the end of every shot — bubbles sit at the top.
    * Upscaled before zoompan, which rounds to whole pixels and shakes otherwise.
+   * The trailing fps= declares the rate again: setpts leaves it unknown, and the
+   * ffmpeg 7 on the Linux worker refuses to crossfade a stream with no rate
+   * ("current rate of 1/0 is invalid") where the Windows build let it pass.
    */
   const filters = shots.map((s, i) => {
     const frames = Math.round(s.seconds * FPS);
     const move = s.move
-      ? `scale=${W * 2}:${H * 2},zoompan=z='1+${ZOOM}*on/${frames}':x='iw/2-iw/zoom/2':y=0:d=1:s=${W}x${H}:fps=${FPS},setpts=N/(${FPS}*TB),`
+      ? `scale=${W * 2}:${H * 2},zoompan=z='1+${ZOOM}*on/${frames}':x='iw/2-iw/zoom/2':y=0:d=1:s=${W}x${H}:fps=${FPS},setpts=N/(${FPS}*TB),fps=${FPS},`
       : `scale=${W}:${H},fps=${FPS},`;
     return `[${i}:v]${move}format=yuv420p,setsar=1[s${i}]`;
   });
