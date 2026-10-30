@@ -1,0 +1,7 @@
+# Uploaded by `vercel` from this folder: keep local data, scratch runs and secrets out.
+.env
+.env.*
+data/
+tmp/
+docs/
+.next/
