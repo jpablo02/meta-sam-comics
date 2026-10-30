@@ -198,7 +198,8 @@ export function coverPrompt(c: CoverInput): string {
     c.setting ? `The world behind them: ${c.setting}` : "",
     "The cast in a dramatic, characterful cover pose, larger than life, their faces in the upper half of the frame",
     `${c.gemName} is in the image — held, half-hidden or glinting in the light — intriguing, noticed on a second look, not centre stage`,
-    "The bottom fifth is calmer — ground, water, shadow — where a title will be laid over later",
+    // Listing "ground, water, shadow" put a puddle on a hospital floor and in a living room.
+    "The bottom fifth is calmer — the scene's own floor or ground, falling into shadow — where a title will be laid over later",
     "Full-bleed vertical cover art filling the whole image edge to edge",
     "Do NOT include any text, title, letters, logos, price, barcode, speech bubbles, panel borders or frame",
   ]

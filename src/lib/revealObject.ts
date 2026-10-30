@@ -77,13 +77,27 @@ export async function revealTeaser(
     .join(" ");
   // The sheet alone when there is one. Given the crop first and the sheet second,
   // the Tide of Secrets card kept the crop's glare and lost the barnacles, and
-  // stuck the letter on the OUTSIDE of the bottle as a label.
-  return generateWithReferences(
-    prompt,
-    [objectSheet ?? cropPath],
-    COLLECTIBLE_SIZE,
-    outPath,
-  );
+  // stuck the letter on the OUTSIDE of the bottle as a label. The crop is the
+  // last resort, when the sheet keeps being refused.
+  const tries = objectSheet ? [[objectSheet], [objectSheet], [cropPath]] : [[cropPath], [cropPath]];
+  return untilAccepted("teaser", tries, (refs) => generateWithReferences(prompt, refs, COLLECTIBLE_SIZE, outPath));
+}
+
+/**
+ * Muse Image's filter refuses at random: on a bronze key with nothing sensitive
+ * in it, the same teaser request passed, failed, then passed again. Two of three
+ * test comics died on the teaser, the last step of seven minutes. A refusal gets
+ * the next set of references; anything else fails at once.
+ */
+async function untilAccepted(label: string, tries: string[][], draw: (refs: string[]) => Promise<string>): Promise<string> {
+  for (let i = 0; ; i++) {
+    try {
+      return await draw(tries[i]);
+    } catch (err) {
+      if (i === tries.length - 1 || !/\((400|422)\)/.test(String(err))) throw err;
+      console.warn(`[${label}] refused (${i + 1}/${tries.length}) — trying again: ${String(err).slice(0, 160)}`);
+    }
+  }
 }
 
 /**
@@ -162,14 +176,6 @@ export async function revealContents(
 
   // The teaser alone: it is already drawn from the object sheet, and two-reference
   // attempts on the Tide of Secrets remake were refused twice in a row.
-  // The filter is not deterministic either — the identical request failed, then
-  // passed — so a refusal gets a second try before the comic is lost.
   const refs = [teaserPath ?? cropPath];
-  try {
-    return await generateWithReferences(prompt, refs, COLLECTIBLE_SIZE, outPath);
-  } catch (err) {
-    if (!/\((400|422)\)/.test(String(err))) throw err;
-    console.warn(`[revealed] refused — trying once more: ${String(err).slice(0, 160)}`);
-    return generateWithReferences(prompt, refs, COLLECTIBLE_SIZE, outPath);
-  }
+  return untilAccepted("revealed", [refs, refs, refs], (r) => generateWithReferences(prompt, r, COLLECTIBLE_SIZE, outPath));
 }
