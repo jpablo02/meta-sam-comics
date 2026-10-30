@@ -132,8 +132,9 @@ export async function revealContents(
     ? [
         "",
         `What the object is: ${options.description}`,
-        "The text goes on the part that carries the message — a letter on its paper, wherever the paper",
-        "is (inside a bottle it is read THROUGH the glass) — never on the outside of something else.",
+        "The text goes on the part that carries the message, where the description puts it — the back",
+        "of a ticket, the inside of a watch lid, a dagger's blade, a letter's paper (read through the",
+        "glass when it is inside a bottle) — never moved onto some other surface of the object.",
       ]
     : [];
 
