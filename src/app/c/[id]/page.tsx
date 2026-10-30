@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { APP_NAME } from "@/lib/brand";
+import { isGuest } from "@/lib/auth";
 import { currentUser } from "@/lib/session";
 import { collectedCount, findCollection, getComic, getStatus } from "@/lib/store";
 import { PANEL_COUNT } from "@/lib/writeScript";
@@ -105,9 +106,13 @@ export default async function ComicPage({ params }: Params) {
             <a href={fileUrl(comic.id, comic.reel)} className="action" download>
               <PlayIcon /> Download reel
             </a>
-            <a href={facebookShareUrl(comic.id)} className="action" target="_blank" rel="noopener noreferrer">
-              <ShareIcon /> Share to Facebook
-            </a>
+            {isGuest(user?.id) ? (
+              <p className="guest-share-note">Sign in with Facebook to share your comic.</p>
+            ) : (
+              <a href={facebookShareUrl(comic.id)} className="action" target="_blank" rel="noopener noreferrer">
+                <ShareIcon /> Share to Facebook
+              </a>
+            )}
           </div>
         </article>
 

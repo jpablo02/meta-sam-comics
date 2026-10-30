@@ -11,8 +11,16 @@
  *
  * A provider is only offered when its credentials are configured, so a fresh
  * clone runs with whatever the developer has set up.
+ *
+ * Guests: a session with no account behind it, so anyone can try Tales without
+ * Facebook — the app stays in Development mode until Meta verifies it, and in
+ * that mode Facebook lets in only the app's own team. A guest can read, collect
+ * and make a few comics, but cannot share to Facebook: there is no Facebook
+ * identity to share as.
  */
+import { randomBytes, randomInt } from "node:crypto";
 import type { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -40,7 +48,22 @@ function configuredProviders(): NextAuthOptions["providers"] {
     );
   }
 
+  providers.push(
+    CredentialsProvider({
+      id: "guest",
+      name: "Guest",
+      credentials: {},
+      // A fresh id every time: a guest who signs out and back in is someone new.
+      authorize: async () => ({ id: randomBytes(8).toString("hex"), name: `Guest ${randomInt(1000, 10000)}` }),
+    }),
+  );
+
   return providers;
+}
+
+/** Guests' ids start with "guest:" — see the jwt callback. */
+export function isGuest(userId: string | undefined | null): boolean {
+  return Boolean(userId?.startsWith("guest:"));
 }
 
 export const authOptions: NextAuthOptions = {

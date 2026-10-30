@@ -146,6 +146,22 @@ export async function saveComic(comic: StoredComic): Promise<void> {
   await writeJson(join(comicDir(comic.id), "comic.json"), comic);
 }
 
+/** Comics this author has made or is making. Failed ones don't count. */
+export async function comicsStartedBy(authorId: string): Promise<number> {
+  const sql = await db();
+  if (sql) {
+    const { rows } = await sql.query(
+      "SELECT count(*)::int AS n FROM statuses WHERE data->'author'->>'id' = $1 AND data->>'state' <> 'failed'",
+      [authorId],
+    );
+    return rows[0].n as number;
+  }
+  const root = join(DATA_DIR, "comics");
+  if (!existsSync(root)) return 0;
+  const statuses = await Promise.all((await readdir(root)).map((id) => readJson<ComicStatus>(join(root, id, "status.json"))));
+  return statuses.filter((s) => s?.author.id === authorId && s.state !== "failed").length;
+}
+
 /** Every finished comic, newest first. */
 export async function listComics(): Promise<StoredComic[]> {
   const sql = await db();

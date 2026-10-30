@@ -7,7 +7,7 @@ import { Avatar, BookIcon, GemIcon, PlayIcon, ShareIcon, timeAgo } from "./ui";
  * A comic in the feed: its cover, not the comic. Reading happens on the comic's
  * own page, top to bottom — the feed only has to make you want to open it.
  */
-export function ComicCover({ comic, collected }: { comic: StoredComic; collected: number }) {
+export function ComicCover({ comic, collected, canShare = true }: { comic: StoredComic; collected: number; canShare?: boolean }) {
   const left = Math.max(0, comic.gem.supply - collected);
   const href = comicPath(comic.id);
 
@@ -38,16 +38,19 @@ export function ComicCover({ comic, collected }: { comic: StoredComic; collected
         </div>
       </Link>
 
-      <div className="actions">
+      {/* Guests have no Facebook identity to share as. */}
+      <div className="actions" style={canShare ? undefined : { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
         <Link href={href} className="action">
           <BookIcon /> Read
         </Link>
         <a href={fileUrl(comic.id, comic.reel)} className="action" download>
           <PlayIcon /> Reel
         </a>
-        <a href={facebookShareUrl(comic.id)} className="action" target="_blank" rel="noopener noreferrer">
-          <ShareIcon /> Share
-        </a>
+        {canShare && (
+          <a href={facebookShareUrl(comic.id)} className="action" target="_blank" rel="noopener noreferrer">
+            <ShareIcon /> Share
+          </a>
+        )}
       </div>
     </article>
   );

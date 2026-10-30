@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { availableProviders } from "@/lib/auth";
+import { availableProviders, isGuest } from "@/lib/auth";
 import { currentUser } from "@/lib/session";
 import { collectedCount, listComics } from "@/lib/store";
 import { ComicCover } from "@/components/ComicCover";
@@ -34,7 +34,7 @@ export default async function Home() {
         </section>
 
         {comics.map((c, i) => (
-          <ComicCover key={c.id} comic={c} collected={counts[i]} />
+          <ComicCover key={c.id} comic={c} collected={counts[i]} canShare={!isGuest(user.id)} />
         ))}
 
         <div className="footer-links">
