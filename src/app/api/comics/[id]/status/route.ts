@@ -10,10 +10,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const status = await getStatus(id).catch(() => null);
   if (!status) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const dir = comicDir(id);
-  const drawn: number[] = [];
-  for (let n = 1; n <= PANEL_COUNT; n++) {
-    if (existsSync(join(dir, `panel-${n}.png`))) drawn.push(n);
+  // The worker records what it has uploaded; a local run is read off the disk.
+  let drawn = status.drawn;
+  if (!drawn) {
+    const dir = comicDir(id);
+    drawn = [];
+    for (let n = 1; n <= PANEL_COUNT; n++) {
+      if (existsSync(join(dir, `panel-${n}.png`))) drawn.push(n);
+    }
   }
   return NextResponse.json(
     { state: status.state, step: status.step, detail: status.detail, error: status.error, drawn },
