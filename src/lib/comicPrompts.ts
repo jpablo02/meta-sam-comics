@@ -288,7 +288,8 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible, withObjectShee
         `name used as a label ("${object.name}" is how the story refers to it, not text on ` +
         "it, unless it is literally its printed title). Its BODY must stay unreadable — fine " +
         "print or handwriting too small, too far, at an angle or out of focus to make out. " +
-        "Show that it has contents; do not let them be read",
+        "Show that it has contents; do not let them be read. There is exactly ONE of it in " +
+        "the panel — never a second copy lying nearby",
     );
     if (withObjectSheet) {
       parts.push(

@@ -17,7 +17,7 @@
  * Every step reports progress through `onStep`, driven by real completion — the
  * UI shows what has actually finished, not a timer.
  */
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
 import { writeScript, toBible, toChapter, type ComicScript } from "./writeScript";
@@ -84,6 +84,8 @@ export async function runComic(idea: string, workDir: string, options: RunOption
   step("script");
   const script = await writeScript(idea, options.artStyle);
   const bible = toBible(script);
+  // Kept as it goes: when a late step fails, what was written is still there to read.
+  await writeFile(join(workDir, "script.json"), JSON.stringify(script, null, 2));
 
   step("portraits", script.characters.map((c) => c.name).join(", "));
   // The cast and the gem are drawn once each, side by side; every panel copies them.
@@ -157,11 +159,12 @@ export async function runComic(idea: string, workDir: string, options: RunOption
   step("contents");
   const chapter = toChapter(script, panels);
   const contents = await writeContents(chapter, journey.label, journey.visibleChanges, script.storyObject.secretContent);
+  await writeFile(join(workDir, "contents.json"), JSON.stringify(contents, null, 2));
 
   step("collectible");
   // Reveal from the sighting SAM and Wonder were surest about.
   const best = sightings.reduce((a, b) => (b.confidence > a.confidence ? b : a));
-  const reveal = { objectName: script.storyObject.name };
+  const reveal = { objectName: script.storyObject.name, description: script.storyObject.description };
   const teaserPath = await toPng(await revealTeaser(best.cropPath, join(workDir, "collectible-teaser.webp"), reveal, objectSheet));
   const revealedPath = await toPng(
     await revealContents(best.cropPath, join(workDir, "collectible-revealed.webp"), reveal, contents, teaserPath),
