@@ -56,6 +56,13 @@ Done on `feat/polish-round-1`:
 - [x] **How it works** page, with a way back home.
 - [x] **My Gems** opens the gem in a modal (art, number, what it says, date);
       the comic is one button further.
+- [x] **Comic page opens on panel 1** — the cover lives in the feed and the
+      reel; repeating it after tapping it felt wrong.
+- [x] **Script rules from the demo:** every speaker is called by name by
+      someone else (readers had no way to tell who was who), and a distinctive
+      mark is never a missing or hand/finger detail (Ramiro's "missing pinky
+      tip" became stubs on every finger and a floating fingertip). Both are
+      validated and sent back to Muse Spark before anything is drawn.
 - [x] **Bubbles stay** (owner's call): they are SAM 3.1 at work. No caption
       strip fallback — a bubble must be placed well, not hidden.
 
@@ -73,6 +80,19 @@ Done on `feat/polish-round-1`:
 - [ ] **One Cloud Run Job execution per comic**, so comics are made in parallel
       and a slow one never blocks the web.
 - [ ] **Files on Cloud Storage behind a CDN**, resized once at upload.
+
+### Monetization (later — collecting stays free for the demo)
+
+- [ ] **Stars on the reel.** The author posts the story reel on Facebook, where
+      fans can send Stars (about $0.01 each, paid by Meta to the creator). Tales
+      earns nothing here, but it gives creators a reason to post — check Meta's
+      current eligibility rules before promising it.
+- [ ] **Creation credits.** A few free comics a month, then paid credits: the
+      real cost is the Muse Image calls per comic.
+- [ ] **Paid golden edition.** The 100 copies stay free; the first 10 of a
+      separate golden edition are paid, split with the author.
+- [ ] **Facebook payments** for apps exist only for Instant Games (up to 30%
+      fee); a web app like Tales would charge with its own processor.
 
 ## Waiting on a decision
 

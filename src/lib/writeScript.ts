@@ -74,6 +74,9 @@ hair colour and cut, eye colour, skin tone, build, every garment with its colour
 distinctive mark. Never "normal hair" or "casual clothes". If the idea describes a character
 (skin, build, height, clothes), those traits go in EXACTLY, even if the name resembles a famous
 character who "should" look different. Do not default everyone to slim and fair-skinned.
+The distinctive mark is something worn or carried, or a mark on the face or forearm (a scar, a
+tattoo, a gold tooth) — big enough to see in a wide shot. NEVER a missing, extra or damaged body
+part, and never on the hands or fingers: the art cannot keep those consistent from panel to panel.
 
 LOCATIONS: declare each place once with a detailed, stable visual description (architecture,
 materials, colours, defining props, lighting), so it is drawn as the same place every time.
@@ -103,6 +106,10 @@ Translate names of things, never the names of people.
 "dialogue" names who speaks, and separates speakers with " | ":
 "Camila: Look what the net brought! | Ramiro: No... I know that bottle." Short lines — each one
 fits a speech bubble. Leave it empty for a silent panel.
+The reader has no cast list: the dialogue must tell them who is who. Every character who speaks
+is called by their name in someone else's line at least once, early ("Ramiro, look what the net
+brought!" / "I know that bottle, Camila."), and family ties are said aloud when they matter
+("Grandpa", "my brother").
 
 "imagePrompt" describes ONLY action, camera angle, lighting and mood. Name characters, never
 describe how they look (that is injected from "traits"). Name the location in "location";
@@ -129,6 +136,13 @@ function extract(text: string): Record<string, unknown> {
   return JSON.parse(text.slice(start, end + 1));
 }
 
+/** A distinctive mark the art cannot hold from panel to panel. */
+const BODY_PART_MARK = /\b(missing|amputat\w*|stump|severed|prosthe\w*|finger\w*|pinky|thumb\w*|knuckle\w*|hands?|palm)\b/i;
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 /**
  * Check what the rest of the pipeline relies on. A script that breaks one of
  * these would not fail here — it would fail three models later, as a panel with
@@ -144,6 +158,11 @@ export function validateScript(script: ComicScript): string[] {
   for (const c of script.characters) {
     const missing = (["age", "build", "skin", "hair", "eyes", "outfit"] as const).filter((k) => !c.traits?.[k]?.trim());
     if (missing.length) problems.push(`${c.name} is missing traits: ${missing.join(", ")}`);
+    // Ramiro's "missing tip of left pinky" came out as stubs on every finger and a
+    // fingertip floating in mid-air.
+    if (BODY_PART_MARK.test(c.traits?.distinctive ?? "")) {
+      problems.push(`${c.name}'s distinctive mark is on the hands or a missing body part: "${c.traits.distinctive}" — choose something worn, carried, or on the face or forearm`);
+    }
   }
   for (const s of script.scenes) {
     for (const n of s.characters) {
@@ -159,6 +178,20 @@ export function validateScript(script: ComicScript): string[] {
     }
     if (s.location && !places.has(s.location.toLowerCase())) {
       problems.push(`panel ${s.panelNumber} uses undeclared location "${s.location}"`);
+    }
+  }
+  // Readers meet the cast through the dialogue alone: every speaker must be named
+  // by someone else, or a two-hander reads as "a young woman and an old man".
+  if (script.characters.length > 1) {
+    const lines = script.scenes.flatMap((s) => (s.dialogue ?? "").split("|").map((l) => l.trim()).filter(Boolean));
+    const said = (l: string) => l.slice(l.indexOf(":") + 1);
+    const speakerOf = (l: string) => l.slice(0, l.indexOf(":")).replace(/\([^)]*\)/, "").trim().toLowerCase();
+    const speakers = new Set(lines.map(speakerOf));
+    for (const c of script.characters) {
+      const name = c.name.toLowerCase();
+      if (!speakers.has(name)) continue;
+      const named = lines.some((l) => speakerOf(l) !== name && new RegExp(`\\b${escapeRegExp(name)}\\b`, "i").test(said(l)));
+      if (!named) problems.push(`nobody calls ${c.name} by name in the dialogue — another character must say "${c.name}" in a line, early`);
     }
   }
   const planted = script.storyObject.plantedInPanels.filter((p) => p >= 1 && p <= PANEL_COUNT);

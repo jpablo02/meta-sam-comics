@@ -86,20 +86,9 @@ export default async function ComicPage({ params }: Params) {
             {comic.logline}
           </div>
 
-          {/* Read top to bottom, like a webtoon: the cover, then one panel per screen on a phone. */}
+          {/* Read top to bottom, like a webtoon: one panel per screen on a phone. The cover
+              stays in the feed and the reel — opening the comic from it starts the story. */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {comic.cover && (
-              <div className="cover has-art" style={{ aspectRatio: "2 / 3" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={fileUrl(comic.id, comic.cover, 1080)} alt={`Cover of ${comic.chapterTitle}`} />
-                <div className="cover-text">
-                  <span className="cover-series">{comic.seriesTitle}</span>
-                  <span className="cover-title" style={{ fontSize: 34 }}>
-                    {comic.chapterTitle}
-                  </span>
-                </div>
-              </div>
-            )}
             {comic.panels.map((p, i) => (
               // eslint-disable-next-line @next/next/no-img-element
               <img
