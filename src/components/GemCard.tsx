@@ -114,9 +114,14 @@ export function GemCard(props: Props) {
             {flipped ? "Turn it back" : "Read what it says"}
           </button>
         ) : !props.signedIn ? (
-          <button type="button" className="gem-cta" onClick={() => signIn("facebook")}>
-            Continue with Facebook to collect
-          </button>
+          <>
+            <button type="button" className="gem-cta" onClick={() => signIn("facebook")}>
+              Continue with Facebook to collect
+            </button>
+            <button type="button" className="gem-guest" onClick={() => signIn("guest", { callbackUrl: window.location.href })}>
+              or collect it as a guest
+            </button>
+          </>
         ) : (
           <button type="button" className="gem-cta" onClick={collect} disabled={busy || soldOut}>
             {soldOut ? "All copies collected" : busy ? "Collecting…" : "Collect this Gem"}
