@@ -44,12 +44,21 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   // JPEG for link previews: not every crawler reads WebP.
   const jpg = search.get("f") === "jpg";
   const privateFile = comic && name === comic.gem.revealed;
-  const cache = privateFile ? "private, no-store" : "public, max-age=3600";
+  // Revalidate every time: a file can be redrawn under the same name (a remade
+  // demo, a repaired panel), and a max-age kept showing the old art for an hour.
+  // The ETag makes the check a cheap 304 when nothing changed.
+  const cache = privateFile ? "private, no-store" : "public, no-cache";
+  const { size, mtimeMs } = await stat(path);
+  const etag = `"${Math.round(mtimeMs).toString(36)}-${size.toString(36)}-${w || 0}${jpg ? "j" : ""}"`;
+  if (!privateFile && req.headers.get("if-none-match") === etag) {
+    return new Response(null, { status: 304, headers: { ETag: etag, "Cache-Control": cache } });
+  }
 
   if (WIDTHS.has(w) && ext !== "mp4") {
     const resized = `${path}.w${w}.${jpg ? "jpg" : "webp"}`;
     let body: Buffer;
-    if (existsSync(resized)) {
+    // A resized copy older than its original is a copy of the old art.
+    if (existsSync(resized) && (await stat(resized)).mtimeMs >= mtimeMs) {
       body = await readFile(resized);
     } else {
       const img = sharp(path).resize({ width: w });
@@ -58,12 +67,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       await writeFile(resized, body).catch(() => {});
     }
     return new Response(new Uint8Array(body), {
-      headers: { "Content-Type": jpg ? "image/jpeg" : "image/webp", "Cache-Control": cache },
+      headers: { "Content-Type": jpg ? "image/jpeg" : "image/webp", "Cache-Control": cache, ETag: etag },
     });
   }
 
-  const { size } = await stat(path);
   return new Response(new Uint8Array(await readFile(path)), {
-    headers: { "Content-Type": TYPES[ext] ?? "application/octet-stream", "Content-Length": String(size), "Cache-Control": cache },
+    headers: { "Content-Type": TYPES[ext] ?? "application/octet-stream", "Content-Length": String(size), "Cache-Control": cache, ETag: etag },
   });
 }

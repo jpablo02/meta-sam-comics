@@ -539,7 +539,69 @@ img, video { max-width: 100%; display: block; }
 
 .gems-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 @media (min-width: 560px) { .gems-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.gem-tile { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: inherit; }
+.gem-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-decoration: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.gem-tile img { transition: transform 0.25s, box-shadow 0.25s; }
+.gem-tile:hover img, .gem-tile:focus-visible img { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25); }
+
+/* A gem, opened from the collection: the art large, the words beside it. */
+.gem-modal {
+  width: min(920px, calc(100vw - 32px));
+  max-height: calc(100svh - 32px);
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  background: #0b0d17;
+  color: #fff;
+  overflow: auto;
+}
+.gem-modal::backdrop { background: rgba(5, 6, 12, 0.72); backdrop-filter: blur(6px); }
+.gem-modal[open] { animation: gem-modal-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1); }
+@keyframes gem-modal-in { from { opacity: 0; transform: translateY(16px) scale(0.97); } }
+@media (prefers-reduced-motion: reduce) { .gem-modal[open] { animation: none; } }
+.gem-modal-body { position: relative; display: grid; gap: 20px; padding: 20px; }
+@media (min-width: 720px) { .gem-modal-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; padding: 28px; } }
+.gem-modal-art { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 16px; box-shadow: 0 0 60px rgba(245, 184, 61, 0.18); }
+.gem-modal-info { display: flex; flex-direction: column; gap: 12px; }
+.gem-modal-info .gem-number { text-align: left; margin: 0; }
+.gem-modal-meta { margin: 0; font-size: 14px; line-height: 1.5; color: rgba(255, 255, 255, 0.72); }
+.gem-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(11, 13, 23, 0.6);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+.gem-modal-nav { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 14px; color: rgba(255, 255, 255, 0.7); }
+.gem-modal-nav button {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
 .gem-tile img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 12px; }
 .gem-tile strong { font-size: 14px; line-height: 1.25; }
 
@@ -593,6 +655,23 @@ img, video { max-width: 100%; display: block; }
   background: linear-gradient(180deg, rgba(11, 13, 23, 0.35) 0%, rgba(11, 13, 23, 0.45) 50%, #0b0d17 100%);
 }
 .how-hero-content { position: relative; z-index: 1; width: 100%; max-width: 980px; margin: 0 auto; padding: 32px 16px 40px; }
+.how-back {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 20;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff !important;
+  background: rgba(11, 13, 23, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  transition: background 0.2s;
+}
+.how-back:hover { background: rgba(11, 13, 23, 0.8); }
 .how-brand { font-weight: 800; font-size: 22px; letter-spacing: -0.5px; text-decoration: none; color: #fff !important; }
 .how-hero h1 {
   margin: 10px 0 8px;

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "One idea, four Meta models, and a story with something worth keeping.",
 };
 
-/** The idea the example on this page was made from, exactly as it was typed. */
+/** The idea the example comic on this page was made from. */
 const IDEA =
   "Camila es una pescadora joven de Cartagena… Al amanecer saca de la red una botella verde con un papel " +
   "enrollado adentro. Se la muestra a su abuelo Ramiro, que palidece al reconocerla y se niega a abrirla.";
@@ -69,6 +69,9 @@ export default function HowItWorks() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/landing/hero-wide.webp" alt="" />
         </picture>
+        <Link href="/" className="how-back" aria-label="Back to home">
+          ← Home
+        </Link>
         <div className="how-hero-content">
           <Link href="/" className="how-brand">
             {APP_NAME}

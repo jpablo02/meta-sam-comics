@@ -43,20 +43,36 @@ Done on `feat/polish-round-1`:
 - [x] **Shared bubble in the demo** ("…net brought! Ramiro: No…"): the demo
       panels predated the parser fix; re-lettered with `scripts/reletter.ts`.
 
+## Round 3 — done on `feat/how-it-works`
+
+- [x] **Landing artwork** — commissioned hero (open book of worlds), motes, sheen.
+- [x] **A cover per comic**, cast described in text so Muse keeps the faces.
+- [x] **Demo remade** from the run with the gem sheet: one bottle in all four
+      panels, the letter inside it, readable on the collector's card.
+- [x] **Stale images**: files were cached an hour by the browser and resized
+      copies were never redrawn, so the remade demo still showed the old art.
+      Now `no-cache` + ETag (cheap 304) and resized copies older than their
+      original are redrawn.
+- [x] **How it works** page, with a way back home.
+- [x] **My Gems** opens the gem in a modal (art, number, what it says, date);
+      the comic is one button further.
+- [x] **Bubbles stay** (owner's call): they are SAM 3.1 at work. No caption
+      strip fallback — a bubble must be placed well, not hidden.
+
 ## Next
 
-- [ ] **Landing artwork made for it.** No real comic behind the pitch: one
-      commissioned hero image (Muse Image), high resolution, plus a section that
-      explains what Tales is for whoever wants to dig in. Soften the copy — less
-      explicit than "a letter, a key, a dagger".
-- [ ] **A cover per comic**, different from its panels: a dedicated cover image
-      (title space, the cast, the gem hinted) drawn at the end of the pipeline.
-- [ ] **Bubbles vs. a caption strip — to discuss.** Option: dialogue in a strip
-      under each panel instead of bubbles on the art. Pros: no placement fights,
-      never covers faces or the gem, always in order. Cons: reads less like a
-      comic, the art shrinks, a judge may read it as a shortcut. Middle ground:
-      keep bubbles, fall back to the strip only when a panel has no good spot.
+- [ ] Check the gem sheet and the engraving on other stories.
 - [ ] More UX passes from the owner's testing.
+
+## Scaling plan (for the submission, not built for the demo)
+
+- [ ] **Redraw a panel.** The author can ask for one panel again (or its
+      bubbles) when it came out wrong, keeping the cast and gem references.
+- [ ] **Collect is one atomic UPDATE** in Postgres (today: a queue in one
+      process), so numbering holds with many servers.
+- [ ] **One Cloud Run Job execution per comic**, so comics are made in parallel
+      and a slow one never blocks the web.
+- [ ] **Files on Cloud Storage behind a CDN**, resized once at upload.
 
 ## Waiting on a decision
 
