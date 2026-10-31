@@ -296,7 +296,8 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible, withObjectShee
       parts.push(
         `[OBJECT REFERENCE] The ${present.length > 0 ? "LAST attached image" : "attached image"} is ` +
           `the reference sheet of ${object.name}. Draw THIS exact object: same shape, ` +
-          "proportions, materials, colours and wear, every part where the sheet puts it " +
+          "proportions, materials, colours and wear, the same number of pieces opening the " +
+          "same way, every part where the sheet puts it " +
           `(what is inside stays inside, what closes it stays closed)` +
           (object.scale ? `, at its real size — ${object.scale} — next to hands and bodies` : "") +
           ". Take only the object from it; its position, angle and light come from the scene",
@@ -304,6 +305,11 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible, withObjectShee
     }
   }
 
+  // A low angle under a hospital bed left it hanging in the air, legs out of frame.
+  parts.push(
+    "Everything has weight: furniture stands on its legs on the floor, and nothing hangs " +
+      "in the air unless the scene says it does",
+  );
   parts.push(
     "Render a SINGLE full-frame comic illustration of this one scene only — not a page, " +
       "not a grid, no panel borders; the artwork fills the whole image edge to edge",

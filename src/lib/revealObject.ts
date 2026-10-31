@@ -49,7 +49,8 @@ function basePrompt({
     `The exact same ${objectName} shown in the reference image, presented as a collectible:`,
     treatment?.trim() || DEFAULT_TREATMENT,
     description ? `What it is: ${description}` : "",
-    "Keep the same object: same shape, same material, same wear and damage, same colours.",
+    "Keep the same object: same shape, same material, same wear and damage, same colours,",
+    "the same number of pieces opening the same way — never an extra lid, leaf or compartment.",
     "It is shown flat and front-facing, filling most of the frame. No hands, no people.",
   ];
 }

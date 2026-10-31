@@ -91,6 +91,9 @@ lives INSIDE the plot; what it says or holds is revealed only to whoever collect
   its contents never readable on the page.
 - "description" says what it is made of, its colours, and how its parts fit together — where
   anything it holds actually sits (a letter rolled INSIDE the bottle, the cork IN its neck).
+  If it opens, say how many pieces it has and how they move — "opens like a book into exactly
+  two halves, one small frame in each". A vague "lid with two inner frames" was drawn as two
+  pieces on the sheet and three on the cards.
 - "scale" is its real size against a human hand: "about 25 cm tall, held in one hand".
 - "secretContent" is the collector's reward: the exact words, the photo, what the key opens.
   It must add real information to the story — something that changes how the chapter reads.
