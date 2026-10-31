@@ -34,7 +34,7 @@ function newId(): string {
 }
 
 /** The idea as the script writer receives it: the gem hint, if any, is part of it. */
-function fullIdea(idea: string, gemHint?: string): string {
+export function fullIdea(idea: string, gemHint?: string): string {
   const hint = gemHint?.trim();
   return hint ? `${idea.trim()}\n\nThe gem — the object hidden in this story that readers will collect: ${hint}` : idea.trim();
 }
