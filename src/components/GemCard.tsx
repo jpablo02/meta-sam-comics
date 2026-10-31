@@ -72,7 +72,7 @@ export function GemCard(props: Props) {
   }
 
   return (
-    <section className="gem-stage" aria-label="The gem">
+    <section className="gem-stage" id="gem" aria-label="The gem">
       <div className="gem-stage-bg" style={{ backgroundImage: `url(${props.backdropSrc})` }} />
       <div className="glass">
         <div>

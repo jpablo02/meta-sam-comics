@@ -3,10 +3,10 @@ import { APP_NAME } from "@/lib/brand";
 import type { Author } from "@/lib/store";
 import { Avatar } from "./ui";
 
-export function TopBar({ user }: { user: Author | null }) {
+export function TopBar({ user, wide = false }: { user: Author | null; wide?: boolean }) {
   return (
     <header className="topbar">
-      <div className="topbar-inner">
+      <div className={wide ? "topbar-inner wide" : "topbar-inner"}>
         <Link href="/" className="brand">
           {APP_NAME}
         </Link>
