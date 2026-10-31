@@ -191,7 +191,7 @@ export async function drawPanel(
   const size = PANEL_SIZE;
 
   try {
-    await generateWithReferences(panelPrompt(scene, bible, withSheet), refs, size, outPath);
+    await twice(() => generateWithReferences(panelPrompt(scene, bible, withSheet), refs, size, outPath));
     return "references";
   } catch (err) {
     if (!isPolicyRejection(err) || refs.length === 0) throw err;
@@ -199,12 +199,26 @@ export async function drawPanel(
 
   const softened = { ...scene, imagePrompt: await softenScene(scene.imagePrompt) };
   try {
-    await generateWithReferences(panelPrompt(softened, bible, withSheet), refs, size, outPath);
+    await twice(() => generateWithReferences(panelPrompt(softened, bible, withSheet), refs, size, outPath));
     return "softened";
   } catch (err) {
     if (!isPolicyRejection(err)) throw err;
   }
 
-  await generateImage(panelPrompt(scene, bible), size, outPath);
+  await twice(() => generateImage(panelPrompt(scene, bible), size, outPath));
   return "no-references";
+}
+
+/**
+ * Each rung gets a second try before the next. The filter also refuses at
+ * random: a firefighter's first panel was refused on all three rungs in one run,
+ * and the very same prompt passed four times out of four minutes later.
+ */
+async function twice(draw: () => Promise<string>): Promise<string> {
+  try {
+    return await draw();
+  } catch (err) {
+    if (!isPolicyRejection(err)) throw err;
+    return draw();
+  }
 }

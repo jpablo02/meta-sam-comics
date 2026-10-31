@@ -138,7 +138,10 @@ export async function revealContents(
   // reproduce "a single object" in the reference, the same card passed. A flight
   // recorder reads as a crash, whatever the story says it is.
   const refs = [teaserPath ?? cropPath];
-  return untilAccepted("revealed", [options, options, { objectName: "single object" }], (o) =>
+  // Six tries, not three: Aurelio's love letter, nothing sensitive in it, was
+  // refused on all three tries of one run and passed on the first of the next.
+  const plain = { objectName: "single object" };
+  return untilAccepted("revealed", [options, options, plain, plain, plain, plain], (o) =>
     generateWithReferences(prompt(o), refs, COLLECTIBLE_SIZE, outPath),
   );
 }
