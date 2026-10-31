@@ -90,7 +90,7 @@ export async function revealTeaser(
  * test comics died on the teaser, the last step of seven minutes. A refusal gets
  * the next set of references; anything else fails at once.
  */
-async function untilAccepted(label: string, tries: string[][], draw: (refs: string[]) => Promise<string>): Promise<string> {
+async function untilAccepted<T>(label: string, tries: T[], draw: (attempt: T) => Promise<string>): Promise<string> {
   for (let i = 0; ; i++) {
     try {
       return await draw(tries[i]);
@@ -128,9 +128,25 @@ export async function revealContents(
   const lines = [contents.title, ...contents.revealed]
     .map((l) => l.trim())
     .filter(Boolean);
+  const prompt = (o: RevealOptions) => revealedPrompt(o, lines, Boolean(teaserPath));
+
+  // The teaser alone: it is already drawn from the object sheet, and two-reference
+  // attempts on the Tide of Secrets remake were refused twice in a row.
+  //
+  // The last try names nothing. A "Black Box from Ares IV — titanium flight
+  // recorder" was refused five times running, with or without its text; asked to
+  // reproduce "a single object" in the reference, the same card passed. A flight
+  // recorder reads as a crash, whatever the story says it is.
+  const refs = [teaserPath ?? cropPath];
+  return untilAccepted("revealed", [options, options, { objectName: "single object" }], (o) =>
+    generateWithReferences(prompt(o), refs, COLLECTIBLE_SIZE, outPath),
+  );
+}
+
+function revealedPrompt(options: RevealOptions, lines: string[], fromTeaser: boolean): string {
   // The fallback once had a beige studio backdrop where the teaser was dark smoke:
   // the background has to be named as part of what stays.
-  const staging = teaserPath
+  const staging = fromTeaser
     ? [
         `The reference image is a collectible card of a ${options.objectName}. Reproduce it exactly — same`,
         "object, same pose, same framing, the SAME dark background, the same lighting and colours —",
@@ -153,7 +169,7 @@ export async function revealContents(
       ]
     : [];
 
-  const prompt = [
+  return [
     ...staging,
     ...where,
     "",
@@ -174,9 +190,4 @@ export async function revealContents(
     "no text box, no flat overlay, no lettering floating in front of the object.",
     "Each line appears once — no word repeated.",
   ].join("\n");
-
-  // The teaser alone: it is already drawn from the object sheet, and two-reference
-  // attempts on the Tide of Secrets remake were refused twice in a row.
-  const refs = [teaserPath ?? cropPath];
-  return untilAccepted("revealed", [refs, refs, refs], (r) => generateWithReferences(prompt, r, COLLECTIBLE_SIZE, outPath));
 }
