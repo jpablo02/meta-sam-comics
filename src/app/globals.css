@@ -1122,3 +1122,41 @@ img, video { max-width: 100%; display: block; }
   /* Leave room for the previous-story arrow beside the text. */
   .hero-text { left: max(72px, calc((100% - 1040px) / 2 + 16px)); }
 }
+
+.topbar-start { display: flex; align-items: center; gap: 10px; }
+.topbar-home {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+.topbar-home:hover, .topbar-home:focus-visible { background: var(--surface-2); color: var(--accent); }
+
+/*
+ * With a mouse the rows keep a gutter on each side, and the arrows live in it:
+ * small, quiet, and never on top of a cover.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .scroll-row { padding: 0 32px; }
+  .scroll-row .shelf-row { padding-left: 0; padding-right: 0; }
+  .row-arrow {
+    width: 26px;
+    height: 26px;
+    margin-top: -13px;
+    font-size: 20px;
+    padding-bottom: 2px;
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--muted);
+    box-shadow: none;
+  }
+  .row-arrow:hover { background: rgba(0, 0, 0, 0.14); color: var(--text); }
+  .row-arrow.prev { left: 3px; }
+  .row-arrow.next { right: 3px; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-color-scheme: dark) {
+  .row-arrow { background: rgba(255, 255, 255, 0.08); }
+  .row-arrow:hover { background: rgba(255, 255, 255, 0.16); }
+}

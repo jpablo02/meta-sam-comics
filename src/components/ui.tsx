@@ -29,6 +29,15 @@ export function GemIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+export function HomeIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg {...ICON} width={size} height={size}>
+      <path d="M3 10.5 12 3l9 7.5" />
+      <path d="M5 9.5V21h5v-6h4v6h5V9.5" />
+    </svg>
+  );
+}
+
 export function ShareIcon() {
   return (
     <svg {...ICON}>
