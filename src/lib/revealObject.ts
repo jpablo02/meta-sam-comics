@@ -80,7 +80,7 @@ export async function revealTeaser(
   // the Tide of Secrets card kept the crop's glare and lost the barnacles, and
   // stuck the letter on the OUTSIDE of the bottle as a label. The crop is the
   // last resort, when the sheet keeps being refused.
-  const tries = objectSheet ? [[objectSheet], [objectSheet], [cropPath]] : [[cropPath], [cropPath]];
+  const tries = objectSheet ? [[objectSheet], [objectSheet], [objectSheet], [cropPath], [cropPath]] : [[cropPath], [cropPath], [cropPath], [cropPath]];
   return untilAccepted("teaser", tries, (refs) => generateWithReferences(prompt, refs, COLLECTIBLE_SIZE, outPath));
 }
 
