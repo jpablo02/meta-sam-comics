@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { APP_NAME } from "@/lib/brand";
 import type { Author } from "@/lib/store";
-import { Avatar } from "./ui";
+import { AccountMenu } from "./AccountMenu";
 
+/** Both doors are always in reach: read and collect, or make your own. */
 export function TopBar({ user, wide = false }: { user: Author | null; wide?: boolean }) {
   return (
     <header className="topbar">
@@ -12,10 +13,14 @@ export function TopBar({ user, wide = false }: { user: Author | null; wide?: boo
         </Link>
         {user && (
           <nav className="topbar-nav">
-            <Link href="/gems" className="button secondary small">
-              My Gems
+            <Link href="/create" className="button small topbar-create" aria-label="Create a comic">
+              <span aria-hidden="true">+</span>
+              <span className="topbar-create-label">Create</span>
             </Link>
-            <Avatar name={user.name} image={user.image} size={36} />
+            <Link href="/gems" className="button secondary small">
+              My collection
+            </Link>
+            <AccountMenu name={user.name} image={user.image} />
           </nav>
         )}
       </div>

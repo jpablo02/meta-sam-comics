@@ -9,8 +9,6 @@ export interface HeroSlide {
   series: string;
   title: string;
   logline: string;
-  gemName: string;
-  gemLeft: number;
 }
 
 const EVERY_MS = 6500;
@@ -18,23 +16,49 @@ const EVERY_MS = 6500;
 /**
  * The top of the feed: every comic takes a turn, the most collected first.
  * It stops while a reader is on it, and never moves for someone who asked
- * their system for less motion.
+ * their system for less motion. The arrow keys step through it too.
  */
 export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  // Changing the slide by hand restarts the clock, so it never jumps right after.
+  const [turn, setTurn] = useState(0);
+  const count = slides.length;
 
   useEffect(() => {
-    if (paused || slides.length < 2) return;
+    if (paused || count < 2) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = setInterval(() => setIndex((i) => (i + 1) % slides.length), EVERY_MS);
+    const timer = setInterval(() => setIndex((i) => (i + 1) % count), EVERY_MS);
     return () => clearInterval(timer);
-  }, [paused, slides.length]);
+  }, [paused, count, turn]);
 
-  if (slides.length === 0) return null;
+  function go(to: number) {
+    setIndex(((to % count) + count) % count);
+    setTurn((t) => t + 1);
+  }
+
+  useEffect(() => {
+    if (count < 2) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const t = e.target as HTMLElement;
+      // Arrows belong to whoever is typing, and to an open dialog.
+      if (t.closest("input, textarea, select, [contenteditable], dialog")) return;
+      if (document.querySelector("dialog[open]")) return;
+      e.preventDefault();
+      const by = e.key === "ArrowRight" ? 1 : -1;
+      setIndex((i) => (i + by + count) % count);
+      setTurn((n) => n + 1);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [count]);
+
+  if (count === 0) return null;
   const slide = slides[index];
   // Only the current cover and the next are loaded: the rest wait their turn.
-  const next = (index + 1) % slides.length;
+  const next = (index + 1) % count;
 
   return (
     <section
@@ -62,13 +86,20 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             <Link href={slide.href} className="button">
               Read the comic
             </Link>
-            <Link href={`${slide.href}#gem`} className="button hero-gem">
-              {slide.gemLeft > 0 ? "Collect the gem" : "See the gem"}
-            </Link>
           </div>
         </div>
+        {count > 1 && (
+          <>
+            <button type="button" className="hero-arrow prev" aria-label="Previous story" onClick={() => go(index - 1)}>
+              ‹
+            </button>
+            <button type="button" className="hero-arrow next" aria-label="Next story" onClick={() => go(index + 1)}>
+              ›
+            </button>
+          </>
+        )}
       </div>
-      {slides.length > 1 && (
+      {count > 1 && (
         <div className="hero-dots">
           {slides.map((s, i) => (
             <button
@@ -77,7 +108,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               className={i === index ? "hero-dot on" : "hero-dot"}
               aria-label={`Show ${s.title}`}
               aria-current={i === index}
-              onClick={() => setIndex(i)}
+              onClick={() => go(i)}
             />
           ))}
         </div>

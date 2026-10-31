@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { availableProviders, isGuest } from "@/lib/auth";
 import { currentUser } from "@/lib/session";
 import { collectedCount, listComics } from "@/lib/store";
@@ -6,9 +5,9 @@ import { comicPath, fileUrl } from "@/lib/urls";
 import { ComicCover } from "@/components/ComicCover";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { Landing } from "@/components/Landing";
-import { GemCircles, NewThisWeek, TopFive } from "@/components/Shelves";
+import { NewGems } from "@/components/NewGems";
+import { NewThisWeek, TopFive } from "@/components/Shelves";
 import { TopBar } from "@/components/TopBar";
-import { Avatar } from "@/components/ui";
 import { SignOutButton } from "./sign-in-buttons";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +25,6 @@ export default async function Home() {
 
   const counts = await Promise.all(comics.map((c) => collectedCount(c.id)));
   const collected = new Map(comics.map((c, i) => [c.id, counts[i]]));
-  const firstName = user.name.split(/\s+/)[0];
 
   // listComics is newest first, and sort is stable: ties stay newest first.
   const mostCollected = [...comics].sort((a, b) => collected.get(b.id)! - collected.get(a.id)!);
@@ -40,8 +38,17 @@ export default async function Home() {
     series: c.seriesTitle,
     title: c.chapterTitle,
     logline: c.logline,
-    gemName: c.gem.name,
-    gemLeft: Math.max(0, c.gem.supply - collected.get(c.id)!),
+  }));
+  const newGems = comics.slice(0, 9).map((c) => ({
+    comicId: c.id,
+    name: c.gem.name,
+    teaser: fileUrl(c.id, c.gem.teaser, 360),
+    teaserLarge: fileUrl(c.id, c.gem.teaser, 1080),
+    seriesTitle: c.seriesTitle,
+    chapterTitle: c.chapterTitle,
+    comicHref: comicPath(c.id),
+    left: Math.max(0, c.gem.supply - collected.get(c.id)!),
+    supply: c.gem.supply,
   }));
 
   return (
@@ -50,17 +57,10 @@ export default async function Home() {
       <HeroCarousel slides={slides} />
       <div className="home">
         <aside className="home-side">
-          <GemCircles comics={comics.slice(0, 9)} />
+          <NewGems gems={newGems} />
         </aside>
 
         <main className="home-main">
-          <section className="card composer">
-            <Avatar name={user.name} image={user.image} />
-            <Link href="/create" className="composer-fake">
-              What&apos;s your story, {firstName}?
-            </Link>
-          </section>
-
           <TopFive comics={mostCollected.slice(0, 5)} />
           <NewThisWeek comics={fresh.slice(0, 12)} title={fresh === thisWeek ? "New this week" : "Latest stories"} />
 

@@ -35,7 +35,7 @@ export default async function GemsPage() {
       <TopBar user={user} />
       <main className="feed">
         <section className="card">
-          <h1 style={{ margin: "0 0 4px", fontSize: 24 }}>My Gems</h1>
+          <h1 style={{ margin: "0 0 4px", fontSize: 24 }}>My collection</h1>
           <p className="muted" style={{ margin: "0 0 16px" }}>
             {items.length === 0
               ? "Nothing yet. Every comic hides one — collect it to read what it says."
