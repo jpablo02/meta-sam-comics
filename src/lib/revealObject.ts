@@ -22,7 +22,8 @@
  * anyone who opens devtools. Two files means the teaser never contains it.
  */
 import { generateWithReferences } from "./drawPanels";
-import type { ObjectContents } from "./writeContents";
+import { metaClient } from "./metaClient";
+import { MUSE_SPARK_MODEL, type ObjectContents } from "./writeContents";
 
 /** Vertical, like the panels: a collectible card that fits a phone and a Story. */
 export const COLLECTIBLE_SIZE = "1024x1536";
@@ -56,6 +57,45 @@ function basePrompt({
 }
 
 /**
+ * How to stage this one object so its message faces the viewer.
+ *
+ * The collector's card is drawn from the teaser in the same pose, so the teaser
+ * must already show where the message is: a closed diary left the reveal nowhere
+ * to write but the cover, a sealed envelope only its back. One general sentence
+ * could not serve every object — with examples in it, a compass engraved inside
+ * its lid grew a paper note; without them, the envelope stayed shut. So each
+ * object gets its own sentence, written from its own description.
+ */
+async function displayPose({ objectName, description }: RevealOptions): Promise<string> {
+  try {
+    const completion = await metaClient().chat.completions.create({
+      model: MUSE_SPARK_MODEL,
+      messages: [
+        {
+          role: "user",
+          content:
+            `An illustrator will draw this object alone, as a display piece: ${objectName} — ${description}\n\n` +
+            "In ONE sentence, say how to pose it so the surface that carries its written message " +
+            "faces the viewer, flat and visible. If that surface is inside something a hand can " +
+            "open (a cover, a lid, a flap, an envelope, a fold), say how it is opened to show it. " +
+            "If it can never be opened (a corked bottle), it stays closed and is seen through. Use " +
+            "only the parts named in the description, each at its real size; never add a note, paper or any new piece. " +
+            "Answer with the sentence only.",
+        },
+      ],
+    });
+    const pose = completion.choices[0]?.message?.content?.trim();
+    if (pose) {
+      console.log(`[teaser] pose: ${pose}`);
+      return `Pose: ${pose}`;
+    }
+  } catch (err) {
+    console.warn(`[teaser] no display pose — drawing without one: ${String(err).slice(0, 160)}`);
+  }
+  return "";
+}
+
+/**
  * What anyone sees: the object, its contents unreadable.
  *
  * With the object sheet as a second reference, the card is the object the
@@ -69,7 +109,8 @@ export async function revealTeaser(
 ): Promise<string> {
   const prompt = [
     ...basePrompt(options),
-    "Its contents sit exactly where the reference shows them — nothing moves from inside to outside.",
+    options.description ? await displayPose(options) : "",
+    "Add nothing the description does not have — no note, paper, label or extra piece.",
     "Its contents are present but NOT readable: the writing is blurred, faded, scorched or",
     "partly covered by shadow, so the viewer can tell there is a message and cannot read a",
     "single word of it.",
