@@ -18,7 +18,7 @@
  * and make a few comics, but cannot share to Facebook: there is no Facebook
  * identity to share as.
  */
-import { randomBytes, randomInt } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -52,13 +52,23 @@ function configuredProviders(): NextAuthOptions["providers"] {
     CredentialsProvider({
       id: "guest",
       name: "Guest",
-      credentials: {},
-      // A fresh id every time: a guest who signs out and back in is someone new.
-      authorize: async () => ({ id: randomBytes(8).toString("hex"), name: `Guest ${randomInt(1000, 10000)}` }),
+      // The browser keeps its guest id (signInAsGuest), so signing out and back in
+      // on the same browser is the same guest: same gems, same comics, same limit.
+      // 64 random bits are the only secret — nobody can guess another guest's.
+      credentials: { guestId: { type: "text" } },
+      authorize: async (credentials) => {
+        const id = /^[a-f0-9]{16}$/.test(credentials?.guestId ?? "") ? credentials!.guestId : randomBytes(8).toString("hex");
+        return { id, name: guestName(id) };
+      },
     }),
   );
 
   return providers;
+}
+
+/** "Guest 4821", the same every time for the same id. */
+function guestName(id: string): string {
+  return `Guest ${1000 + (parseInt(id.slice(0, 6), 16) % 9000)}`;
 }
 
 /** Guests' ids start with "guest:" — see the jwt callback. */

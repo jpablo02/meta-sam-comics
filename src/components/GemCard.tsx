@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { signInAsGuest } from "@/app/sign-in-buttons";
 
 interface Props {
   comicId: string;
@@ -118,7 +119,7 @@ export function GemCard(props: Props) {
             <button type="button" className="gem-cta" onClick={() => signIn("facebook")}>
               Continue with Facebook to collect
             </button>
-            <button type="button" className="gem-guest" onClick={() => signIn("guest", { callbackUrl: window.location.href })}>
+            <button type="button" className="gem-guest" onClick={() => signInAsGuest(window.location.href)}>
               or collect it as a guest
             </button>
           </>
