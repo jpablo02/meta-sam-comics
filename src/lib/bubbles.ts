@@ -466,6 +466,23 @@ export async function bakeBubbles(
     if (Object.keys(missed).length === 0) break;
   }
 
+  // Last try, without Muse Wonder: the head by its hair, the one trait seen from
+  // any side. Diego, turned away in his ponytail, was missed one run in three and
+  // his "What is that?" became a narration box. A box centred on someone already
+  // found is that someone, not the missing speaker.
+  for (const c of speakers.filter((s) => !faces.has(s.name) && s.traits.hair)) {
+    const hair = (c.traits.hair ?? "").split(/[,;]/)[0].split(/\s+/).slice(0, 6).join(" ");
+    const hit = await segmentImage(panelPath, `head with ${hair}`, panelNumber);
+    if (!hit) continue;
+    const sx = width / hit.canvas.w;
+    const sy = height / hit.canvas.h;
+    const box = { x1: hit.box.x1 * sx, y1: hit.box.y1 * sy, x2: hit.box.x2 * sx, y2: hit.box.y2 * sy };
+    const centre: [number, number] = [(box.x1 + box.x2) / 2, (box.y1 + box.y2) / 2];
+    if ([...faces.values()].some((f) => inside(centre, f))) continue;
+    faces.set(c.name, box);
+    console.warn(`[bubbles] panel ${panelNumber}: ${c.name} found by hair ("${hair}")`);
+  }
+
   // A speaker we could not find speaks from off-panel: narration, not a tail to nowhere.
   const unplaced = speakers.map((c) => c.name).filter((n) => !faces.has(n));
   const resolved = lines.map((l) => (l.speaker && !faces.has(l.speaker) ? { ...l, speaker: null } : l));
