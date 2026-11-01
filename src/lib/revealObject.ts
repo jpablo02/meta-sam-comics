@@ -52,7 +52,11 @@ function basePrompt({
     description ? `What it is: ${description}` : "",
     "Keep the same object: same shape, same material, same wear and damage, same colours,",
     "the same number of pieces opening the same way — never an extra lid, leaf or compartment.",
-    "It is shown flat and front-facing, filling most of the frame. No hands, no people.",
+    // "Filling most of the frame" made a vertical card stretch what is long and thin:
+    // a cinema ticket became a folded letter, a dog collar a strip cut off at both edges.
+    "Keep its REAL proportions: never stretched, enlarged or reshaped to fill the frame. A long,",
+    "thin object (a ticket, a spoon, a collar, a key) lies on a diagonal, whole, with dark space",
+    "around it. It is shown flat and front-facing. No hands, no people.",
   ];
 }
 
@@ -110,10 +114,14 @@ export async function revealTeaser(
   const prompt = [
     ...basePrompt(options),
     options.description ? await displayPose(options) : "",
-    "Add nothing the description does not have — no note, paper, label or extra piece.",
-    "Its contents are present but NOT readable: the writing is blurred, faded, scorched or",
-    "partly covered by shadow, so the viewer can tell there is a message and cannot read a",
-    "single word of it.",
+    "Add nothing the description does not have — no note, paper, label, patch or extra piece.",
+    // "Scorched" was one of the ways offered to hide the words: every paper card came
+    // back with burnt edges, and a spoon carved on its handle grew a burnt patch in
+    // its bowl, which the collector's card then wrote on like a scrap of paper.
+    "Its contents are present but NOT readable: the writing sits exactly where the description",
+    "puts it, made the way the object carries it (ink, carving, print), and is too small, faint,",
+    "blurred or shadowed to read a single word. The object itself stays undamaged — no burns,",
+    "no scorch marks, no torn or charred edges unless the description has them.",
   ]
     .filter(Boolean)
     .join(" ");

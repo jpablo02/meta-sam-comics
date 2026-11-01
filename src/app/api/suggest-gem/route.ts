@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { metaClient } from "@/lib/metaClient";
 import { MUSE_SPARK_MODEL } from "@/lib/writeContents";
 import { currentUser } from "@/lib/session";
+import { MIN_IDEA } from "@/lib/ideaRules";
 
 /**
  * Every story has a gem. When the writer has none in mind, Muse Spark proposes
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
 
   const body = (await req.json().catch(() => ({}))) as { idea?: unknown };
   const idea = typeof body.idea === "string" ? body.idea.trim().slice(0, 1200) : "";
-  if (idea.length < 20) return NextResponse.json({ error: "Write the story first." }, { status: 400 });
+  if (idea.length < MIN_IDEA) return NextResponse.json({ error: "Write the story first." }, { status: 400 });
 
   const prompt = [
     "A writer is about to turn this idea into a four-panel comic:",

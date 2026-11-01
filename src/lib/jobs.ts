@@ -41,7 +41,7 @@ export function fullIdea(idea: string, gemHint?: string): string {
 
 export async function startComic(author: Author, idea: string, gemHint?: string): Promise<string> {
   const job: ComicJob = { id: newId(), author, createdAt: new Date().toISOString(), idea: fullIdea(idea, gemHint) };
-  const status: ComicStatus = { id: job.id, author, createdAt: job.createdAt, state: "running", step: "script" };
+  const status: ComicStatus = { id: job.id, author, createdAt: job.createdAt, state: "running", step: "script", idea: job.idea };
   await saveStatus(status);
 
   if (process.env.TALES_RUN_JOB) {
@@ -79,7 +79,15 @@ async function launchJob(jobName: string, job: ComicJob): Promise<void> {
  */
 export async function makeComic(job: ComicJob, workDir: string): Promise<void> {
   const remote = workDir !== comicDir(job.id);
-  let status: ComicStatus = { id: job.id, author: job.author, createdAt: job.createdAt, state: "running", step: "script", drawn: [] };
+  let status: ComicStatus = {
+    id: job.id,
+    author: job.author,
+    createdAt: job.createdAt,
+    state: "running",
+    step: "script",
+    drawn: [],
+    idea: job.idea,
+  };
   const drawn: number[] = [];
 
   // Steps arrive faster than uploads finish: one write at a time, in order.

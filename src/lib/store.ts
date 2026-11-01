@@ -71,6 +71,8 @@ export interface ComicStatus {
   error?: string;
   /** Panels already drawn, for the progress view. */
   drawn?: number[];
+  /** The idea as the script writer received it, so a failed comic can be tried again. Never sent to the browser. */
+  idea?: string;
 }
 
 export interface Collection {
@@ -95,11 +97,24 @@ async function readJson<T>(path: string): Promise<T | null> {
   }
 }
 
-/** Write-then-rename, so a reader never sees half a file. */
+/**
+ * Write-then-rename, so a reader never sees half a file. On Windows the rename
+ * is refused while the progress view happens to be reading the file — a finished
+ * comic showed "EPERM … status.json" — so a busy target is tried again.
+ */
 async function writeJson(path: string, value: unknown): Promise<void> {
   const tmp = `${path}.${process.pid}.tmp`;
   await writeFile(tmp, JSON.stringify(value, null, 2));
-  await rename(tmp, path);
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await rename(tmp, path);
+      return;
+    } catch (e) {
+      const busy = ["EPERM", "EBUSY", "EACCES"].includes((e as NodeJS.ErrnoException).code ?? "");
+      if (!busy || attempt === 9) throw e;
+      await new Promise((r) => setTimeout(r, 50));
+    }
+  }
 }
 
 export async function getComic(id: string): Promise<StoredComic | null> {

@@ -20,7 +20,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     }
   }
   return NextResponse.json(
-    { state: status.state, step: status.step, detail: status.detail, error: status.error, drawn },
+    // The idea stays on the server: only whether it can be tried again goes out.
+    { state: status.state, step: status.step, detail: status.detail, error: status.error, drawn, canRetry: Boolean(status.idea) },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

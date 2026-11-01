@@ -3,9 +3,9 @@ import { currentUser } from "@/lib/session";
 import { startComic } from "@/lib/jobs";
 import { isGuest } from "@/lib/auth";
 import { comicsStartedBy } from "@/lib/store";
+import { GUEST_COMICS, MIN_IDEA } from "@/lib/ideaRules";
 
 const MAX_IDEA = 1200;
-const GUEST_COMICS = 2;
 const MAX_HINT = 300;
 
 /** Start a comic. Returns its id at once; the page polls its status. */
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as { idea?: unknown; gemHint?: unknown };
   const idea = typeof body.idea === "string" ? body.idea.trim() : "";
   const gemHint = typeof body.gemHint === "string" ? body.gemHint.trim() : "";
-  if (idea.length < 20) return NextResponse.json({ error: "Tell us a little more — a sentence or two." }, { status: 400 });
+  if (idea.length < MIN_IDEA) return NextResponse.json({ error: "Tell us a little more." }, { status: 400 });
   if (gemHint.length < 3) return NextResponse.json({ error: "Every story needs its gem." }, { status: 400 });
   if (idea.length > MAX_IDEA || gemHint.length > MAX_HINT) {
     return NextResponse.json({ error: "That idea is too long." }, { status: 400 });

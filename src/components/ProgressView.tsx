@@ -22,6 +22,7 @@ interface Status {
   detail?: string;
   error?: string;
   drawn: number[];
+  canRetry?: boolean;
 }
 
 /**
@@ -31,6 +32,22 @@ interface Status {
 export function ProgressView({ id, total }: { id: string; total: number }) {
   const router = useRouter();
   const [status, setStatus] = useState<Status | null>(null);
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
+
+  async function retry() {
+    setRetrying(true);
+    setRetryError(null);
+    try {
+      const res = await fetch(`/api/comics/${id}/retry`, { method: "POST" });
+      const body = (await res.json().catch(() => ({}))) as { id?: string; error?: string };
+      if (!res.ok || !body.id) throw new Error(body.error ?? "Could not start it again.");
+      router.push(`/c/${body.id}`);
+    } catch (e) {
+      setRetryError(e instanceof Error ? e.message : String(e));
+      setRetrying(false);
+    }
+  }
 
   useEffect(() => {
     let stop = false;
@@ -76,9 +93,16 @@ export function ProgressView({ id, total }: { id: string; total: number }) {
 
       <section className="card">
         {status?.state === "failed" ? (
-          <p className="error" style={{ margin: 0 }}>
-            Something went wrong while making this comic. {status.error ? `(${status.error})` : ""}
-          </p>
+          <div className="retry">
+            <p className="error" style={{ margin: 0 }}>Something went wrong while making this comic.</p>
+            {status.canRetry && (
+              <button type="button" className="button" onClick={retry} disabled={retrying}>
+                {retrying ? "Starting…" : "Try again"}
+              </button>
+            )}
+            {retryError && <p className="error" style={{ margin: 0 }}>{retryError}</p>}
+            {status.error && <p className="muted retry-detail">{status.error}</p>}
+          </div>
         ) : (
           <ol className="steps">
             {STEPS.map((s, i) => {

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { MIN_IDEA } from "@/lib/ideaRules";
 
 /**
  * Two fields, both required: the story, and its gem. Every story has one — when
@@ -15,7 +16,7 @@ export function CreateForm() {
   const [suggesting, setSuggesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const ideaReady = idea.trim().length >= 20;
+  const ideaReady = idea.trim().length >= MIN_IDEA;
 
   async function suggest() {
     setSuggesting(true);
