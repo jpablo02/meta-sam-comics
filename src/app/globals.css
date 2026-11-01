@@ -290,26 +290,39 @@ img, video { max-width: 100%; display: block; }
 .gem-label { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #ffd27a; }
 .gem-headline { font-size: 20px; font-weight: 600; line-height: 1.2; margin: 2px 0 0; }
 
-.flip { perspective: 1200px; border: 0; padding: 0; background: none; cursor: pointer; display: block; width: 100%; }
-.flip-inner {
+/* The gem's words come into focus on the same object: blurred, then sharp. */
+.reveal { border: 0; padding: 0; background: none; cursor: pointer; display: block; width: 100%; }
+.reveal-inner {
   position: relative;
   aspect-ratio: 2 / 3;
-  transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
-  transform-style: preserve-3d;
-}
-.flip.flipped .flip-inner { transform: rotateY(180deg); }
-.flip-face {
-  position: absolute;
-  inset: 0;
   border-radius: 16px;
   overflow: hidden;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
   background: #000;
 }
-.flip-face img { width: 100%; height: 100%; object-fit: cover; }
-.flip-back { transform: rotateY(180deg); }
-@media (prefers-reduced-motion: reduce) { .flip-inner { transition: none; } }
+.reveal-inner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.reveal-hidden { transition: filter 1.2s ease, transform 1.2s ease; }
+.reveal-shown {
+  opacity: 0;
+  filter: blur(18px) brightness(1.4);
+  transform: scale(1.04);
+  transition: opacity 1.1s ease, filter 1.4s cubic-bezier(0.2, 0.7, 0.2, 1), transform 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal.revealed .reveal-hidden { filter: blur(6px); transform: scale(1.02); }
+.reveal.revealed .reveal-shown { opacity: 1; filter: none; transform: none; }
+.reveal-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 226, 163, 0.55) 48%, rgba(255, 255, 255, 0.7) 50%, transparent 68%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.reveal.revealed .reveal-shine { animation: reveal-shine 1.3s 0.25s ease-out; }
+@keyframes reveal-shine { to { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) {
+  .reveal-hidden, .reveal-shown { transition: opacity 0.3s; }
+  .reveal-shown { filter: none; transform: none; }
+  .reveal.revealed .reveal-shine { animation: none; }
+}
 
 .supply { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: rgba(255, 255, 255, 0.8); }
 .supply-bar { height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
@@ -770,11 +783,11 @@ img, video { max-width: 100%; display: block; }
 
 .how-single { width: min(100%, 360px); margin: 0 auto; }
 
-.how-flip { perspective: 1400px; width: min(100%, 340px); margin: 0 auto; outline: none; cursor: pointer; }
-.how-flip-inner { position: relative; aspect-ratio: 2 / 3; transform-style: preserve-3d; transition: transform 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
-.how-flip:hover .how-flip-inner, .how-flip:focus .how-flip-inner { transform: rotateY(180deg); }
-.how-flip-inner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.how-flip-back { transform: rotateY(180deg); }
+.how-flip { width: min(100%, 340px); margin: 0 auto; outline: none; cursor: pointer; }
+.how-flip-inner { position: relative; aspect-ratio: 2 / 3; border-radius: 16px; overflow: hidden; }
+.how-flip-inner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.how-flip-back { opacity: 0; filter: blur(18px) brightness(1.4); transform: scale(1.04); transition: opacity 1.1s ease, filter 1.4s cubic-bezier(0.2, 0.7, 0.2, 1), transform 1.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.how-flip:hover .how-flip-back, .how-flip:focus .how-flip-back { opacity: 1; filter: none; transform: none; }
 
 .how-collect {
   display: flex;

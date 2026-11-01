@@ -168,7 +168,7 @@ export default function HowItWorks() {
           title="The gem: everyone sees it, collectors read it"
           model="Muse Spark + Muse Image"
           art={
-            <div className="how-flip" tabIndex={0} aria-label="The gem card: hover or focus to turn it over">
+            <div className="how-flip" tabIndex={0} aria-label="The gem card: hover or focus to reveal it">
               <div className="how-flip-inner">
                 <Img src="/how/card-teaser.webp" alt="The gem card, its letter unreadable" />
                 <Img src="/how/card-revealed.webp" alt="The gem card, its letter written out" className="how-flip-back" />
@@ -181,7 +181,7 @@ export default function HowItWorks() {
             gets carries the real words — written by Muse Spark, drawn into the object by Muse Image: ink in the
             paper, letters cut into metal. They tell you something the comic did not.
           </p>
-          <p className="how-hint">Hover the card to turn it over.</p>
+          <p className="how-hint">Hover the card to reveal it.</p>
         </Step>
 
         <Step

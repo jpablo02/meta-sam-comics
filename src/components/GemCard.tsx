@@ -24,13 +24,13 @@ interface Props {
 
 /**
  * The gem: everyone sees the object, only collectors read it. Collecting is one
- * tap; the card turns over and the copy number is theirs ("#37 of 100").
+ * tap; the words come into focus and the copy number is theirs ("#37 of 100").
  */
 export function GemCard(props: Props) {
   const [myNumber, setMyNumber] = useState(props.myNumber);
   const [collected, setCollected] = useState(props.collected);
   const [lines, setLines] = useState(props.revealedLines);
-  const [flipped, setFlipped] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +53,7 @@ export function GemCard(props: Props) {
       setMyNumber(data.number);
       setCollected(data.collected);
       setLines(data.revealedLines);
-      setFlipped(true);
+      setRevealed(true);
     } catch {
       setError("Could not collect it. Try again.");
     } finally {
@@ -82,20 +82,19 @@ export function GemCard(props: Props) {
 
         <button
           type="button"
-          className={flipped ? "flip flipped" : "flip"}
-          onClick={() => canRead && setFlipped((f) => !f)}
-          aria-label={flipped ? `${props.gemName}, revealed` : `${props.gemName}, its contents hidden`}
-          aria-pressed={flipped}
+          className={revealed ? "reveal revealed" : "reveal"}
+          onClick={() => canRead && setRevealed((f) => !f)}
+          aria-label={revealed ? `${props.gemName}, revealed` : `${props.gemName}, its contents hidden`}
+          aria-pressed={revealed}
         >
-          <div className="flip-inner">
-            <div className="flip-face">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={props.teaserSrc} alt="" />
-            </div>
-            <div className="flip-face flip-back">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {canRead && <img src={props.revealedSrc} alt="" />}
-            </div>
+          {/* Not turned over — nobody writes on the back of an envelope. The same
+              object comes into focus, and the words appear on it. */}
+          <div className="reveal-inner">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="reveal-hidden" src={props.teaserSrc} alt="" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {canRead && <img className="reveal-shown" src={props.revealedSrc} alt="" />}
+            <span className="reveal-shine" aria-hidden="true" />
           </div>
         </button>
 
@@ -111,8 +110,8 @@ export function GemCard(props: Props) {
         </div>
 
         {canRead ? (
-          <button type="button" className="gem-cta" onClick={() => setFlipped((f) => !f)}>
-            {flipped ? "Turn it back" : "Read what it says"}
+          <button type="button" className="gem-cta" onClick={() => setRevealed((f) => !f)}>
+            {revealed ? "Hide it again" : "Read what it says"}
           </button>
         ) : !props.signedIn ? (
           <>
@@ -131,7 +130,7 @@ export function GemCard(props: Props) {
 
         {error && <p className="error" style={{ margin: 0, color: "#ffb4b4" }}>{error}</p>}
 
-        {flipped && lines && lines.length > 0 && <p className="gem-lines">{lines.join("\n")}</p>}
+        {revealed && lines && lines.length > 0 && <p className="gem-lines">{lines.join("\n")}</p>}
       </div>
     </section>
   );
