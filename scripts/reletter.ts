@@ -27,7 +27,7 @@ async function main() {
       avoid.push({ x1: (a.box.x1 * width) / a.canvas.w, y1: (a.box.y1 * height) / a.canvas.h, x2: (a.box.x2 * width) / a.canvas.w, y2: (a.box.y2 * height) / a.canvas.h });
     }
     const out = join(runDir, `panel-${n}-lettered.png`);
-    const { unplaced } = await bakeBubbles(raw, scene.dialogue ?? "", r.script.characters, out, avoid, n);
+    const { unplaced } = await bakeBubbles(raw, scene.dialogue ?? "", r.script.characters, out, avoid, n, scene.characters);
     console.log(`panel ${n}: ${unplaced.length ? `unplaced ${unplaced.length}` : "ok"}`);
   }
 }

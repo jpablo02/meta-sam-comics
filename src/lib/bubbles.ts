@@ -50,6 +50,27 @@ export interface Line {
  * A segment with no "Name:" prefix is narration.
  */
 export function parseDialogue(dialogue: string, cast: string[]): Line[] {
+  return mergeRuns(splitDialogue(dialogue, cast));
+}
+
+/**
+ * "Nora: No way… | Nora: I lost this months ago." is one person talking: one
+ * bubble. Measured: as two, each with its own tail, the tails crossed.
+ */
+function mergeRuns(lines: Line[]): Line[] {
+  const out: Line[] = [];
+  for (const l of lines) {
+    const last = out[out.length - 1];
+    if (last && l.speaker && last.speaker === l.speaker && last.whisper === l.whisper) {
+      out[out.length - 1] = { ...last, text: `${last.text} ${l.text}` };
+    } else {
+      out.push(l);
+    }
+  }
+  return out;
+}
+
+function splitDialogue(dialogue: string, cast: string[]): Line[] {
   const known = new Map(cast.map((n) => [n.toLowerCase(), n]));
   // The script is asked to separate speakers with "|", and does not always: it
   // wrote "Camila: Look! Ramiro: No... that bottle." — two speakers, one bubble,
@@ -70,7 +91,7 @@ export function parseDialogue(dialogue: string, cast: string[]): Line[] {
 }
 
 /**
- * One Muse Wonder call: a SAM phrase for each speaker's face, or null if off-panel.
+ * One Muse Wonder call: a SAM phrase for each character's face, or null if off-panel.
  * `missed` lists phrases that found nothing on an earlier pass, so the retry
  * asks differently instead of repeating them.
  */
@@ -171,12 +192,27 @@ interface Placed {
   /** Face the tail points at; absent for narration. */
   target?: Box;
   tail?: Tail;
+  /** No legal spot existed: placed anyway, over whatever was there. */
+  forced?: boolean;
 }
 
 const overlaps = (a: Box, b: Box, gap = 0) =>
   a.x1 < b.x2 + gap && a.x2 + gap > b.x1 && a.y1 < b.y2 + gap && a.y2 + gap > b.y1;
 
 const grow = (b: Box, by: number): Box => ({ x1: b.x1 - by, y1: b.y1 - by, x2: b.x2 + by, y2: b.y2 + by });
+
+/**
+ * The face, plus the hair or hat above it and a margin below. SAM is asked for
+ * the face only, so the tail has a precise target; but a bubble resting on
+ * someone's hair or cap reads as covering them (measured: the postman's cap,
+ * Dana's and Diego's hair), and the match is sometimes the cap alone, with the
+ * face under it (the postman again, Edith's bubble on his nose).
+ */
+const headOf = (f: Box): Box => {
+  const w = f.x2 - f.x1;
+  const h = f.y2 - f.y1;
+  return { x1: f.x1 - w * 0.12, y1: f.y1 - h * 0.35, x2: f.x2 + w * 0.12, y2: f.y2 + h * 0.5 };
+};
 
 /** Points along a tail, for collision checks. */
 function tailPoints(t: Tail): Array<[number, number]> {
@@ -188,9 +224,17 @@ function tailPoints(t: Tail): Array<[number, number]> {
   return pts;
 }
 const inside = ([x, y]: [number, number], b: Box) => x > b.x1 && x < b.x2 && y > b.y1 && y < b.y2;
+/**
+ * The head end of a whole-body box. Measured: a square off the top of the
+ * postman — arm raised, envelope in hand — reached his belt.
+ */
+const topOf = (b: Box): Box => ({ ...b, y2: b.y1 + Math.min((b.y2 - b.y1) * 0.3, (b.x2 - b.x1) * 0.6) });
+const centreOf = (b: Box): [number, number] => [(b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2];
+/** Either box's centre inside the other: the same head found twice. */
+const sameSpot = (a: Box, b: Box) => inside(centreOf(a), b) || inside(centreOf(b), a);
 
 /** How many partial layouts survive each step of the search. */
-const BEAM_WIDTH = 6;
+const BEAM_WIDTH = 10;
 
 /**
  * Place every line, in order, without painting later lines into a corner.
@@ -241,7 +285,8 @@ function bubbleOptions(
   const fontSize = Math.round(width * 0.04);
   const pad = fontSize * 0.75;
   const lineHeight = fontSize * 1.18;
-  const blocked = [...[...faces.values()].map((f) => grow(f, width * 0.015)), ...obstacles];
+  const blocked = [...[...faces.values()].map((f) => grow(headOf(f), width * 0.015)), ...obstacles];
+  const allFaces = [...faces.values()];
   const speakerFaces = [...new Set(allLines.map((l) => l.speaker).filter((s): s is string => !!s))]
     .map((s) => faces.get(s))
     .filter((f): f is Box => !!f);
@@ -285,6 +330,11 @@ function bubbleOptions(
         const tail = tailGeometry(box, target, height);
         if (placed.some((p) => tailPoints(tail).some((pt) => inside(pt, p.box)))) continue;
         score += (Math.hypot(tail.tipX - tail.baseX, tail.tipY - tail.edgeY) / height) * 1.2;
+        // A tail too short to reach its speaker must at least not end nearer
+        // someone else. Measured: Tomas's "Hold on!" sat under Elena with its
+        // tail stopping on her face, so it read as hers.
+        const reach = (f: Box) => Math.hypot(tail.tipX - (f.x1 + f.x2) / 2, tail.tipY - (f.y1 + f.y2) / 2);
+        if (allFaces.some((f) => f !== target && reach(f) < reach(target))) score += 2;
         const cx = (target.x1 + target.x2) / 2;
         score += (Math.abs(x + w / 2 - cx) / width) * 1.0; // near the speaker
         // Above the head is best, beside it is fine, below it reads as wrong.
@@ -316,7 +366,7 @@ function bubbleOptions(
   if (found.length === 0) {
     // Nowhere clear: accept an overlap rather than drop the line.
     const top = prev ? prev.box.y2 + margin : margin;
-    return [{ placed: make({ x1: margin, y1: top, x2: margin + w, y2: top + h }), score: 5 }];
+    return [{ placed: { ...make({ x1: margin, y1: top, x2: margin + w, y2: top + h }), forced: true }, score: 5 }];
   }
   // Keep spots that are genuinely different, not six neighbours of one.
   const picks: Array<{ box: Box; score: number }> = [];
@@ -421,6 +471,9 @@ export interface BakeResult {
   outPath: string;
   /** Speakers whose face was not found — their lines became narration. */
   unplaced: string[];
+  /** For inspection: the faces found and where each bubble went. */
+  faces?: Record<string, Box>;
+  bubbles?: Array<{ speaker: string | null; box: Box; forced: boolean }>;
 }
 
 /**
@@ -436,6 +489,8 @@ export async function bakeBubbles(
   outPath: string,
   avoid: Box[] = [],
   panelNumber = 0,
+  /** Everyone the script puts in this panel: the silent ones' faces stay clear too. */
+  present: string[] = [],
 ): Promise<BakeResult> {
   const { width = 0, height = 0 } = await sharp(panelPath).metadata();
   const lines = parseDialogue(dialogue, cast.map((c) => c.name));
@@ -445,11 +500,15 @@ export async function bakeBubbles(
   }
 
   const speakers = cast.filter((c) => lines.some((l) => l.speaker === c.name));
+  // A sleeping grandmother or a cat says nothing and still must not be covered.
+  const silent = cast.filter((c) => present.includes(c.name) && !speakers.includes(c));
+  const people = [...speakers, ...silent];
   const faces = new Map<string, Box>();
   let missed: Record<string, string> = {};
-  // Two passes: one miss is often just a phrase SAM did not match.
-  for (let pass = 0; pass < 2; pass++) {
-    const pending = speakers.filter((c) => !faces.has(c.name));
+  // Three passes: a miss is often just a phrase SAM did not match, and a wrong
+  // match is thrown back to be asked for differently.
+  for (let pass = 0; pass < 3; pass++) {
+    const pending = people.filter((c) => !faces.has(c.name));
     if (pending.length === 0) break;
     const queries = await faceQueries(panelPath, pending, missed);
     missed = {};
@@ -461,7 +520,32 @@ export async function bakeBubbles(
       }
       const sx = width / hit.canvas.w;
       const sy = height / hit.canvas.h;
-      faces.set(name, { x1: hit.box.x1 * sx, y1: hit.box.y1 * sy, x2: hit.box.x2 * sx, y2: hit.box.y2 * sy });
+      let box = { x1: hit.box.x1 * sx, y1: hit.box.y1 * sy, x2: hit.box.x2 * sx, y2: hit.box.y2 * sy };
+      // A "face" a third of the panel tall is a body. Measured: Diego crouching
+      // under the bed came back whole, and pushed every bubble aside. Asked
+      // again first; on the last pass its top is kept — the head is up there,
+      // and losing the speaker would turn their line into narration.
+      if (box.y2 - box.y1 > height * 0.33 && pass === 2) box = topOf(box);
+      if (box.y2 - box.y1 > height * 0.33) {
+        console.warn(`[bubbles] panel ${panelNumber}: "${query}" found a body, not ${name}'s face`);
+        missed[name] = `${query} (matched the whole body — ask for the face alone)`;
+        continue;
+      }
+      // Two characters cannot share a face. Measured: Diego's phrase found
+      // Lucia, so Diego's own head was left unprotected under his bubble. We
+      // cannot tell which of the two phrases was wrong, so both are asked again.
+      const clash = [...faces.entries()].find(([, f]) => sameSpot(f, box));
+      if (clash) {
+        console.warn(`[bubbles] panel ${panelNumber}: ${name} and ${clash[0]} matched the same face`);
+        // On the last pass a face found beats none: the first match keeps it.
+        if (pass < 2) {
+          faces.delete(clash[0]);
+          missed[clash[0]] = `${queries[clash[0]] ?? clash[0]} (matched the same face as ${name})`;
+        }
+        missed[name] = `${query} (matched the same face as ${clash[0]})`;
+        continue;
+      }
+      faces.set(name, box);
     }
     if (Object.keys(missed).length === 0) break;
   }
@@ -470,17 +554,27 @@ export async function bakeBubbles(
   // any side. Diego, turned away in his ponytail, was missed one run in three and
   // his "What is that?" became a narration box. A box centred on someone already
   // found is that someone, not the missing speaker.
-  for (const c of speakers.filter((s) => !faces.has(s.name) && s.traits.hair)) {
-    const hair = (c.traits.hair ?? "").split(/[,;]/)[0].split(/\s+/).slice(0, 6).join(" ");
-    const hit = await segmentImage(panelPath, `head with ${hair}`, panelNumber);
-    if (!hit) continue;
-    const sx = width / hit.canvas.w;
-    const sy = height / hit.canvas.h;
-    const box = { x1: hit.box.x1 * sx, y1: hit.box.y1 * sy, x2: hit.box.x2 * sx, y2: hit.box.y2 * sy };
-    const centre: [number, number] = [(box.x1 + box.x2) / 2, (box.y1 + box.y2) / 2];
-    if ([...faces.values()].some((f) => inside(centre, f))) continue;
-    faces.set(c.name, box);
-    console.warn(`[bubbles] panel ${panelNumber}: ${c.name} found by hair ("${hair}")`);
+  // And failing that, the person by what they wear — seen from any side, under
+  // any hat — keeping the top of the box, where the head is. Measured: Harry,
+  // back turned under his postman's cap, was missed by face and by hair.
+  const first = (t?: string) => (t ?? "").split(/[,;]/)[0].split(/\s+/).slice(0, 6).join(" ");
+  for (const c of speakers.filter((s) => !faces.has(s.name))) {
+    const tries = [
+      c.traits.hair && { query: `head with ${first(c.traits.hair)}`, body: false },
+      c.traits.outfit && { query: `person wearing ${first(c.traits.outfit)}`, body: true },
+    ].filter((t): t is { query: string; body: boolean } => !!t);
+    for (const t of tries) {
+      const hit = await segmentImage(panelPath, t.query, panelNumber);
+      if (!hit) continue;
+      const sx = width / hit.canvas.w;
+      const sy = height / hit.canvas.h;
+      let box = { x1: hit.box.x1 * sx, y1: hit.box.y1 * sy, x2: hit.box.x2 * sx, y2: hit.box.y2 * sy };
+      if (t.body || box.y2 - box.y1 > height * 0.33) box = topOf(box);
+      if ([...faces.values()].some((f) => sameSpot(f, box))) continue;
+      faces.set(c.name, box);
+      console.warn(`[bubbles] panel ${panelNumber}: ${c.name} found by "${t.query}"`);
+      break;
+    }
   }
 
   // A speaker we could not find speaks from off-panel: narration, not a tail to nowhere.
@@ -490,5 +584,10 @@ export async function bakeBubbles(
   const placed = layoutBubbles(resolved, faces, avoid, width, height);
   const svg = renderSvg(placed, width, height);
   await sharp(panelPath).composite([{ input: Buffer.from(svg) }]).png().toFile(outPath);
-  return { outPath, unplaced };
+  return {
+    outPath,
+    unplaced,
+    faces: Object.fromEntries(faces),
+    bubbles: placed.map((p) => ({ speaker: p.line.speaker, box: p.box, forced: !!p.forced })),
+  };
 }

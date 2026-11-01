@@ -152,7 +152,7 @@ export async function runComic(idea: string, workDir: string, options: RunOption
       avoid.push({ x1: a.box.x1 * sx, y1: a.box.y1 * sy, x2: a.box.x2 * sx, y2: a.box.y2 * sy });
     }
     const out = join(workDir, `panel-${n}-lettered.png`);
-    await bakeBubbles(raw, scene.dialogue ?? "", script.characters, out, avoid, n);
+    await bakeBubbles(raw, scene.dialogue ?? "", script.characters, out, avoid, n, scene.characters);
     lettered.push(out);
   }
 
