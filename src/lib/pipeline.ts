@@ -21,7 +21,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
 import { writeScript, toBible, toChapter, type ComicScript } from "./writeScript";
-import { drawCover, drawObjectSheet, drawPortraits, drawPanel, type PanelRung } from "./drawPanels";
+import { drawCover, drawObjectSheet, drawPortraits, drawPanel, drawSetSheets, type PanelRung } from "./drawPanels";
 import { locateInPanel, describeJourney, type Sighting, type Journey } from "./locateObject";
 import { writeContents, type ObjectContents } from "./writeContents";
 import { revealTeaser, revealContents } from "./revealObject";
@@ -88,15 +88,19 @@ export async function runComic(idea: string, workDir: string, options: RunOption
   await writeFile(join(workDir, "script.json"), JSON.stringify(script, null, 2));
 
   step("portraits", script.characters.map((c) => c.name).join(", "));
-  // The cast and the gem are drawn once each, side by side; every panel copies them.
-  const [portraitMap, objectSheet] = await Promise.all([drawPortraits(bible, workDir), drawObjectSheet(bible, workDir)]);
+  // The cast, the gem and the places are drawn once each, side by side; every panel copies them.
+  const [portraitMap, objectSheet, setSheets] = await Promise.all([
+    drawPortraits(bible, workDir),
+    drawObjectSheet(bible, workDir),
+    drawSetSheets(bible, workDir),
+  ]);
 
   const panels: string[] = [];
   const panelRungs: PanelRung[] = [];
   for (const scene of script.scenes) {
     step("panels", `${scene.panelNumber}/${script.scenes.length}`);
     const out = join(workDir, `panel-${scene.panelNumber}.webp`);
-    panelRungs.push(await drawPanel(scene, bible, portraitMap, out, objectSheet));
+    panelRungs.push(await drawPanel(scene, bible, portraitMap, out, objectSheet, setSheets));
     panels.push(await toPng(out));
   }
 

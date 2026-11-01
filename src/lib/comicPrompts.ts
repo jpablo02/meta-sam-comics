@@ -149,6 +149,28 @@ export function objectSheetPrompt(object: StoryObject, bible: ComicBible): strin
     .join(". ");
 }
 
+/**
+ * Prompt for one location's reference — the place's portrait, empty.
+ *
+ * A sentence did not hold a place either: the snow comic's backyard put the
+ * snowman far left in one panel and centre-right in the next, with eyes in one
+ * and none in the other. Drawn once per location, passed to every panel set
+ * there. It shows only what never changes — people, the story object and
+ * anything the story changes are drawn by the panels themselves.
+ */
+export function setSheetPrompt(location: Location, bible: ComicBible): string {
+  return [
+    bible.artStyle,
+    `Establishing reference of ONE single place: ${location.name} — ${location.description}`,
+    "A wide eye-level view showing the whole place, evenly lit, in sharp focus, every " +
+      "permanent feature in its place: architecture, materials, colours, furniture and fixtures",
+    "The place is EMPTY: no people, no animals, no characters, and no loose objects that " +
+      "someone would carry, build, break or move during a story",
+    "This is a reference, not a story panel: no action, no text, no labels, no captions, " +
+      "no speech bubbles, no panel borders",
+  ].join(". ");
+}
+
 export interface CoverInput {
   artStyle: string;
   logline: string;
@@ -220,9 +242,15 @@ export function stripAppearance(scene: string): string {
 /**
  * Prompt for one panel. The portraits of `scene.characters` must be attached as
  * reference images, in the same order as they are named here — followed, when
- * `withObjectSheet` is set, by the story object's reference sheet, LAST.
+ * `withSetSheet` is set, by the location's reference, and when `withObjectSheet`
+ * is set, by the story object's reference sheet, LAST.
  */
-export function panelPrompt(scene: PanelScene, bible: ComicBible, withObjectSheet = false): string {
+export function panelPrompt(
+  scene: PanelScene,
+  bible: ComicBible,
+  withObjectSheet = false,
+  withSetSheet = false,
+): string {
   const present = bible.characters.filter((c) =>
     scene.characters.some((n) => n.trim().toLowerCase() === c.name.trim().toLowerCase()),
   );
@@ -230,7 +258,7 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible, withObjectShee
 
   if (present.length > 0) {
     parts.push(
-      `The ${withObjectSheet ? `first ${present.length} attached images` : "attached images"} are ` +
+      `The ${withObjectSheet || withSetSheet ? `first ${present.length} attached images` : "attached images"} are ` +
         "IDENTITY REFERENCES: full-body reference sheets of the " +
         "characters in this panel, one per image, in this order: " +
         `${present.map((c) => c.name).join(", ")}. They are NOT style inspiration and NOT a ` +
@@ -262,6 +290,15 @@ export function panelPrompt(scene: PanelScene, bible: ComicBible, withObjectShee
       `[SET SHEET] ${location.name}: ${location.description}. This must look like the SAME ` +
         "physical place in every panel set here; only angle, framing and light may change",
     );
+    if (withSetSheet) {
+      const position = present.length === 0 ? "first" : `number ${present.length + 1}`;
+      parts.push(
+        `[SET REFERENCE] Attached image ${position} is the empty reference of ${location.name}. ` +
+          "Copy the PLACE from it — architecture, materials, colours, furniture, fixtures and " +
+          "where each one stands. Do NOT copy its camera: the angle, distance and framing come " +
+          "from the scene. People and anything the scene adds are drawn into this place",
+      );
+    }
   }
 
   /**

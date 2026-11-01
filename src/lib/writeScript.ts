@@ -83,10 +83,24 @@ Never a missing, extra or damaged body part.
 
 LOCATIONS: declare each place once with a detailed, stable visual description (architecture,
 materials, colours, defining props, lighting), so it is drawn as the same place every time.
+A location holds ONLY what stays the same for the whole chapter — it is drawn once, empty, and
+copied into every panel set there. Anything the story builds, breaks, opens, moves or uses up
+(a snowman being built, a door that gets kicked in, a cake being eaten) is NOT part of the
+location: each panel's "imagePrompt" that shows it states its exact state with the same concrete
+details every time — "the snowman, now three snowballs tall, two coal eyes, a carrot nose".
+Measured: "half-built snowman base" in the location put a snowman in a panel before the boy
+built it, finished in the panel that said half-built, with eyes in one panel and none in the next.
 
 THE STORY OBJECT — mandatory, and the heart of this product. Readers collect an object that
 lives INSIDE the plot; what it says or holds is revealed only to whoever collects it.
 - If the idea names or hints at an object, THAT is the object. Use the reader's hints.
+  A line starting "The gem —" is the reader's own choice and overrides the rest of the idea:
+  the object is EXACTLY the thing that line names, never a different one the story suggests.
+  If it names a thing inside a container ("a picture of their mom inside the notebook"), the
+  object is that thing (the picture) and the container is only where it is kept. Writing on
+  or inside the object ("a mitten with a name written inside") is never a separate object —
+  it is that object's "secretContent". Measured: "a picture of their mom inside the notebook"
+  became the notebook, and "a mitten with a name written inside" became a letter.
 - If it does not, choose one a character can hold, hide, hand over or find: a folded letter,
   a printed report, a ticket with something written on the back, a locket, a key with an
   engraved initial. Nothing generic or symbolic.
@@ -100,8 +114,13 @@ lives INSIDE the plot; what it says or holds is revealed only to whoever collect
   If it opens, say how many pieces it has and how they move — "opens like a book into exactly
   two halves, one small frame in each". A vague "lid with two inner frames" was drawn as two
   pieces on the sheet and three on the cards.
+  If it is or carries a picture (a photo, a drawing, a portrait), "description" says what the
+  picture shows — who, doing what, where. Left as "a small photo", it was drawn as a plate of food.
 - "scale" is its real size against a human hand: "about 25 cm tall, held in one hand".
-- "secretContent" is the collector's reward: the exact words, the photo, what the key opens.
+- "secretContent" is the collector's reward, and it is always WORDS written on the object: a
+  message, a name and a date, a note on the back of a photo, an engraving, what a label says.
+  The collector's card can only reveal writing — a photo or a place in "secretContent" never
+  reaches the reader; put what the picture shows in "description" instead.
   It must add real information to the story — something that changes how the chapter reads.
 - Write the story so the object MATTERS: someone looks at it, reacts to it, passes it on.
 

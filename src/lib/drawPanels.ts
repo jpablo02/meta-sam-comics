@@ -16,6 +16,7 @@ import {
   objectSheetPrompt,
   panelPrompt,
   portraitPrompt,
+  setSheetPrompt,
   type ComicBible,
   type CoverInput,
   type PanelScene,
@@ -133,6 +134,28 @@ export async function drawObjectSheet(bible: ComicBible, workDir: string): Promi
   return out;
 }
 
+/**
+ * One empty reference per location, drawn side by side. Returns name
+ * (lowercased) → file path. A place the filter refuses is simply left out:
+ * its panels are drawn from the description, as before.
+ */
+export async function drawSetSheets(bible: ComicBible, workDir: string): Promise<Map<string, string>> {
+  const sheets = new Map<string, string>();
+  await Promise.all(
+    bible.locations.map(async (location, i) => {
+      const out = join(workDir, `set-${i + 1}.webp`);
+      try {
+        await generateImage(setSheetPrompt(location, bible), PANEL_SIZE, out);
+        sheets.set(location.name.trim().toLowerCase(), out);
+      } catch (err) {
+        if (!isPolicyRejection(err)) throw err;
+        console.warn(`[set] policy rejection for "${location.name}" — its panels go without it`);
+      }
+    }),
+  );
+  return sheets;
+}
+
 function isPolicyRejection(err: unknown): boolean {
   return /content_policy_violation/.test(String(err));
 }
@@ -179,19 +202,25 @@ export async function drawPanel(
   portraits: Map<string, string>,
   outPath: string,
   objectSheet: string | null = null,
+  setSheets: Map<string, string> = new Map(),
 ): Promise<PanelRung> {
   // Same order as panelPrompt names them, so "in this order" stays true.
   const refs = bible.characters
     .filter((c) => scene.characters.some((n) => n.trim().toLowerCase() === c.name.toLowerCase()))
     .map((c) => portraits.get(c.name.toLowerCase()))
     .filter((p): p is string => Boolean(p));
-  // The object sheet goes LAST, after the portraits, as panelPrompt says.
+  // Only when panelPrompt finds the location too — otherwise the image would arrive unexplained.
+  const declared = bible.locations.some((l) => l.name.trim().toLowerCase() === scene.location?.trim().toLowerCase());
+  const setSheet = declared ? setSheets.get(scene.location!.trim().toLowerCase()) : undefined;
+  if (setSheet) refs.push(setSheet);
+  // The object sheet goes LAST, after the portraits and the set, as panelPrompt says.
   const withSheet = Boolean(objectSheet && bible.storyObject?.plantedInPanels.includes(scene.panelNumber));
   if (withSheet) refs.push(objectSheet!);
   const size = PANEL_SIZE;
+  const withSet = Boolean(setSheet);
 
   try {
-    await twice(() => generateWithReferences(panelPrompt(scene, bible, withSheet), refs, size, outPath));
+    await twice(() => generateWithReferences(panelPrompt(scene, bible, withSheet, withSet), refs, size, outPath));
     return "references";
   } catch (err) {
     if (!isPolicyRejection(err) || refs.length === 0) throw err;
@@ -199,7 +228,7 @@ export async function drawPanel(
 
   const softened = { ...scene, imagePrompt: await softenScene(scene.imagePrompt) };
   try {
-    await twice(() => generateWithReferences(panelPrompt(softened, bible, withSheet), refs, size, outPath));
+    await twice(() => generateWithReferences(panelPrompt(softened, bible, withSheet, withSet), refs, size, outPath));
     return "softened";
   } catch (err) {
     if (!isPolicyRejection(err)) throw err;
