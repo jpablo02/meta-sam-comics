@@ -15,19 +15,19 @@ const IDEA =
 const MODELS = [
   {
     name: "Muse Spark",
-    does: "Writes the script from your idea — cast, places, four panels, dialogue — and the words hidden inside the gem.",
+    does: "Writes the script from your idea — cast, places, four panels, dialogue — suggests a gem when you ask, and writes the words hidden inside it.",
   },
   {
     name: "Muse Image",
-    does: "Draws each character once, the gem once, then every panel, the cover and the gem's two cards — anchored on those references.",
+    does: "Draws each character, each place and the gem once, then every panel, the cover and the gem's two cards — anchored on those references.",
   },
   {
     name: "Muse Wonder",
-    does: "Looks at the finished art the way a reader would: decides what to search for, and checks that what was found is really the gem.",
+    does: "Looks at the finished art the way a reader would: decides what to search for — the gem, and every face — and checks that what was found is really the gem.",
   },
   {
     name: "SAM 3.1",
-    does: "Cuts the gem out of the panels pixel by pixel, and finds every speaker's face so the bubbles never cover one.",
+    does: "Cuts the gem out of the panels pixel by pixel, and finds every face in a panel — speaking or silent — so the bubbles never cover one.",
   },
 ];
 
@@ -88,14 +88,15 @@ export default function HowItWorks() {
             cast, the places, what happens and who says what.
           </p>
           <p>
-            And the <strong>gem</strong> — one object inside the story that readers will want to keep. Here, the
-            bottle. What the letter inside it says is written now, and kept back.
+            And the <strong>gem</strong> — one object inside the story that readers will want to keep. You name it,
+            or press Suggest and Muse Spark proposes one from your idea. Here, the bottle. What the letter inside it
+            says is written now, and kept back.
           </p>
         </Step>
 
         <Step
           n={2}
-          title="The cast and the gem are drawn once"
+          title="The cast, the places and the gem are drawn once"
           model="Muse Image"
           art={
             <div className="how-row">
@@ -107,9 +108,13 @@ export default function HowItWorks() {
         >
           <p>
             Before any panel, every character gets a full-body sheet, and the gem gets one of its own — its shape,
-            its size in a hand, the letter rolled <em>inside</em>, the cork <em>in</em> its neck.
+            its size in a hand, the letter rolled <em>inside</em>, the cork <em>in</em> its neck. Every place gets
+            one too, drawn empty: the walls, the furniture, where each thing stands.
           </p>
-          <p>Every panel is drawn from those pictures, not from a description. That is why Camila is Camila in all four, and the bottle never changes size.</p>
+          <p>
+            Every panel is drawn from those pictures, not from a description. That is why Camila is Camila in all
+            four, the place stays the same place while the camera moves, and the bottle never changes size.
+          </p>
         </Step>
 
         <Step
@@ -158,8 +163,9 @@ export default function HowItWorks() {
           art={<Img src="/how/lettered-3.webp" alt="Panel 3 with two speech bubbles placed around the faces" className="how-single" />}
         >
           <p>
-            SAM finds every speaker&apos;s face. The bubbles are then laid out together, the way a letterer would:
-            in reading order, each tail pointing at the one who speaks, never over a face — and never over the gem.
+            SAM finds every face in the panel — the ones speaking and the ones listening. The bubbles are then laid
+            out together, the way a letterer would: in reading order, one per speaker, each tail pointing at the one
+            who speaks, never over a face — and never over the gem.
           </p>
         </Step>
 
@@ -196,8 +202,8 @@ export default function HowItWorks() {
           }
         >
           <p>
-            Sign in with Facebook, share the comic — its preview is the blurred gem — and post the reel. Friends who
-            collect it get their numbered copy, and the text only they can read.
+            Try it as a guest, or sign in with Facebook to share the comic — its preview is the blurred gem. Friends
+            who collect it get their numbered copy, and the text only they can read.
           </p>
         </Step>
 
