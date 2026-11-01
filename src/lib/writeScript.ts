@@ -74,9 +74,10 @@ hair colour and cut, eye colour, skin tone, build, every garment with its colour
 distinctive mark. Never "normal hair" or "casual clothes". If the idea describes a character
 (skin, build, height, clothes), those traits go in EXACTLY, even if the name resembles a famous
 character who "should" look different. Do not default everyone to slim and fair-skinned.
-The distinctive mark is something worn or carried, or a mark on the face or forearm (a scar, a
-tattoo, a gold tooth) — big enough to see in a wide shot. NEVER a missing, extra or damaged body
-part, and never on the hands or fingers: the art cannot keep those consistent from panel to panel.
+The distinctive mark is something WORN or CARRIED — a red scarf, round glasses, a brass compass
+on a chain, a patched satchel, a feather in a hat — big enough to see in a wide shot. Never a
+mark on the skin (no scars, tattoos, birthmarks or face paint), and never a missing, extra or
+damaged body part: given a mark on the face, every character came out with the same scar.
 
 LOCATIONS: declare each place once with a detailed, stable visual description (architecture,
 materials, colours, defining props, lighting), so it is drawn as the same place every time.
@@ -88,7 +89,10 @@ lives INSIDE the plot; what it says or holds is revealed only to whoever collect
   a printed report, a ticket with something written on the back, a locket, a key with an
   engraved initial. Nothing generic or symbolic.
 - It must appear in AT LEAST TWO panels ("plantedInPanels"), visibly handled by a character,
-  its contents never readable on the page.
+  its contents never readable on the page. "plantedInPanels" lists EVERY panel where it is
+  seen at all — even hidden under a mattress or barely in frame — and the "imagePrompt" of each
+  of those panels names it by its name ("slips the antique key under the mattress"), never
+  "a small object" or "something": a panel that does not name it is drawn without it.
 - "description" says what it is made of, its colours, and how its parts fit together — where
   anything it holds actually sits (a letter rolled INSIDE the bottle, the cork IN its neck).
   If it opens, say how many pieces it has and how they move — "opens like a book into exactly
@@ -180,8 +184,43 @@ export function validateScript(script: ComicScript): string[] {
   }
   const planted = script.storyObject.plantedInPanels.filter((p) => p >= 1 && p <= PANEL_COUNT);
   if (planted.length < 2) problems.push("story object must be planted in at least two panels");
+  const noun = objectNoun(script.storyObject.name);
+  for (const s of script.scenes) {
+    if (!planted.includes(s.panelNumber)) continue;
+    if (noun && !mentions(s.imagePrompt ?? "", noun)) {
+      problems.push(`${UNNAMED}panel ${s.panelNumber} shows the story object but its imagePrompt does not name it — say "${script.storyObject.name}", not "a small object"`);
+    }
+  }
   if (!script.storyObject.secretContent.trim()) problems.push("story object has no secret content");
   return problems;
+}
+
+/** Worth one correction, not a failed comic: the panel is still drawn, only without the sheet. */
+const UNNAMED = "(unnamed object) ";
+
+/**
+ * "the antique key" → "key", "the letter in the lining" → "letter": the word
+ * every mention of the object will use.
+ */
+export function objectNoun(name: string): string {
+  const head = name.toLowerCase().split(/\s+(?:of|in|on|with|from|for|inside|under|that|to)\s+/)[0];
+  const words = head.replace(/[^a-z\s-]/g, " ").split(/\s+/).filter(Boolean);
+  return words[words.length - 1] ?? "";
+}
+
+const mentions = (text: string, noun: string) => new RegExp(`\\b${noun}(?:s|es)?\\b`, "i").test(text);
+
+/**
+ * A panel whose picture names the object gets the object's reference sheet.
+ * Measured: Abuela hid "a small object" in panel 1, which was not listed in
+ * plantedInPanels, so panel 1 was drawn with no reference and the key she
+ * hid became a folded paper.
+ */
+function plantEverywhereNamed(script: ComicScript): void {
+  const noun = objectNoun(script.storyObject.name);
+  if (!noun) return;
+  const named = script.scenes.filter((s) => mentions(s.imagePrompt ?? "", noun)).map((s) => s.panelNumber);
+  script.storyObject.plantedInPanels = [...new Set([...script.storyObject.plantedInPanels, ...named])].sort((a, b) => a - b);
 }
 
 /**
@@ -200,7 +239,9 @@ export async function writeScript(idea: string, artStyle = DEFAULT_ART_STYLE): P
     const script = extract(text) as unknown as ComicScript;
     script.artStyle ||= artStyle;
 
-    const problems = validateScript(script);
+    plantEverywhereNamed(script);
+    const all = validateScript(script);
+    const problems = attempt === 1 ? all.filter((p) => !p.startsWith(UNNAMED)) : all;
     if (problems.length === 0) return script;
     if (attempt === 1) throw new Error(`Script still invalid after correction: ${problems.join("; ")}`);
 
