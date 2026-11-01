@@ -74,10 +74,12 @@ hair colour and cut, eye colour, skin tone, build, every garment with its colour
 distinctive mark. Never "normal hair" or "casual clothes". If the idea describes a character
 (skin, build, height, clothes), those traits go in EXACTLY, even if the name resembles a famous
 character who "should" look different. Do not default everyone to slim and fair-skinned.
-The distinctive mark is something WORN or CARRIED — a red scarf, round glasses, a brass compass
-on a chain, a patched satchel, a feather in a hat — big enough to see in a wide shot. Never a
-mark on the skin (no scars, tattoos, birthmarks or face paint), and never a missing, extra or
-damaged body part: given a mark on the face, every character came out with the same scar.
+The distinctive mark is usually something WORN or CARRIED — a red scarf, round glasses, a brass
+compass on a chain, a patched satchel, a feather in a hat — big enough to see in a wide shot.
+A mark on the skin (a scar, a tattoo, freckles, a birthmark) only when it suits that one
+character or the idea asks for it: at most one character per story, and never two characters
+with the same kind of mark. Measured: offered "a scar" as the example, every character got one.
+Never a missing, extra or damaged body part.
 
 LOCATIONS: declare each place once with a detailed, stable visual description (architecture,
 materials, colours, defining props, lighting), so it is drawn as the same place every time.
