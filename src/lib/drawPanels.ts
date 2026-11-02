@@ -94,13 +94,35 @@ export async function generateWithReferences(
   }, outPath);
 }
 
+/**
+ * Draw one reference — a portrait, the gem's sheet, a place — through the
+ * filter's random refusals. A firefighter's comic died on its gem sheet, a
+ * photo with burnt edges, refused once; the same prompt then passed four times
+ * out of four. Three tries, and if all three are refused the reference is left
+ * out: its panels are drawn from words alone, which beats no comic at all.
+ */
+async function drawReference(label: string, draw: () => Promise<string>): Promise<string | null> {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return await draw();
+    } catch (err) {
+      if (!isPolicyRejection(err)) throw err;
+      console.warn(`[${label}] policy rejection (${attempt}/3)`);
+    }
+  }
+  console.warn(`[${label}] refused three times — drawing on without it`);
+  return null;
+}
+
 /** One portrait per character. Returns name (lowercased) → file path. */
 export async function drawPortraits(bible: ComicBible, workDir: string): Promise<Map<string, string>> {
   const portraits = new Map<string, string>();
   for (const character of bible.characters) {
     const out = join(workDir, `portrait-${character.name.toLowerCase()}.webp`);
-    await generateImage(portraitPrompt(character, bible), PORTRAIT_SIZE, out);
-    portraits.set(character.name.toLowerCase(), out);
+    const drawn = await drawReference(`portrait ${character.name}`, () =>
+      generateImage(portraitPrompt(character, bible), PORTRAIT_SIZE, out),
+    );
+    if (drawn) portraits.set(character.name.toLowerCase(), drawn);
   }
   return portraits;
 }
@@ -129,9 +151,9 @@ export async function drawCover(
 /** The story object's reference sheet, drawn once. Null when the story has no object. */
 export async function drawObjectSheet(bible: ComicBible, workDir: string): Promise<string | null> {
   if (!bible.storyObject) return null;
+  const object = bible.storyObject;
   const out = join(workDir, "object-sheet.webp");
-  await generateImage(objectSheetPrompt(bible.storyObject, bible), PORTRAIT_SIZE, out);
-  return out;
+  return drawReference("object sheet", () => generateImage(objectSheetPrompt(object, bible), PORTRAIT_SIZE, out));
 }
 
 /**
@@ -144,13 +166,10 @@ export async function drawSetSheets(bible: ComicBible, workDir: string): Promise
   await Promise.all(
     bible.locations.map(async (location, i) => {
       const out = join(workDir, `set-${i + 1}.webp`);
-      try {
-        await generateImage(setSheetPrompt(location, bible), PANEL_SIZE, out);
-        sheets.set(location.name.trim().toLowerCase(), out);
-      } catch (err) {
-        if (!isPolicyRejection(err)) throw err;
-        console.warn(`[set] policy rejection for "${location.name}" — its panels go without it`);
-      }
+      const drawn = await drawReference(`set ${location.name}`, () =>
+        generateImage(setSheetPrompt(location, bible), PANEL_SIZE, out),
+      );
+      if (drawn) sheets.set(location.name.trim().toLowerCase(), drawn);
     }),
   );
   return sheets;
