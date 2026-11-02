@@ -85,8 +85,8 @@ export default function HowItWorks() {
       <div className="how-body">
         <Step n={1} title="You write an idea" model="Muse Spark" art={<blockquote className="how-idea">“{IDEA}”</blockquote>}>
           <p>
-            A sentence or two, in Spanish or English. <N>Muse Spark</N> turns it into a four-panel script in English: the
-            cast, the places, what happens and who says what.
+            Two words or a whole paragraph, in Spanish or English — &ldquo;un perro&rdquo; is enough. <N>Muse Spark</N> turns
+            it into a four-panel script in English: the cast, the places, what happens and who says what.
           </p>
           <p>
             And the <strong>gem</strong> — one object inside the story that readers will want to keep. You name it,
@@ -134,7 +134,8 @@ export default function HowItWorks() {
         >
           <p>
             Vertical panels, made to be read on a phone — and already the shape of a Reel. Then a cover of its own:
-            the cast, the world, and the gem catching the light somewhere in it.
+            the cast, the world, and the gem catching the light somewhere in it. It takes about seven minutes; you can
+            watch each panel appear, or leave — a bubble in the corner follows the progress and brings you back.
           </p>
         </Step>
 
@@ -203,8 +204,9 @@ export default function HowItWorks() {
           }
         >
           <p>
-            Try it as a guest, or sign in with Facebook to share the comic — its preview is the cover. Friends
-            who collect it get their numbered copy, and the text only they can read.
+            Sign in with Facebook, or try it as a guest. Post the link to Facebook — its preview is the cover — or
+            share the comic as a video, ready for Reels, Stories or WhatsApp. Friends who collect the gem get their
+            numbered copy, and the text only they can read.
           </p>
         </Step>
 

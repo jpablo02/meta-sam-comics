@@ -4,7 +4,7 @@
 
 <p align="center">
   <b><a href="https://tales.pablodrum.xyz">Try it live → tales.pablodrum.xyz</a></b><br>
-  <sub>No account needed: press <i>Try it as a guest</i>.</sub>
+  <sub>Continue with Facebook — or press <i>Try it as a guest</i>, no account needed.</sub>
 </p>
 
 ---
@@ -81,7 +81,9 @@ shaped, in the comments of [`src/lib`](src/lib).
 ## Collect and share
 
 Every gem has 100 numbered copies, given out in the order people collect them. Comics appear in a
-shared feed; signed in with Facebook, you can post one, and its preview is the cover.
+shared feed. Signed in with Facebook, you can post a comic's link — its preview is the cover — and
+anyone can share it as a video, ready for Reels, Stories or WhatsApp, from the phone's own share
+sheet.
 
 ## Architecture
 
@@ -94,7 +96,8 @@ Browser ── Next.js 15 on Vercel ──┬── Meta Model API (Muse Spark �
 
 A comic takes about seven minutes — longer than a serverless request lives — so the web app starts a
 Cloud Run Job and the page polls real progress: each step ticks when it has finished, each panel
-appears the moment it is drawn. Locally, the same pipeline runs inside the dev server and writes to
+appears the moment it is drawn. Leave the page and a bubble in the corner keeps the percentage and
+brings you back; if a run fails, the reader is told why in plain words and can try it again. Locally, the same pipeline runs inside the dev server and writes to
 `data/comics/`.
 
 | Where | What |

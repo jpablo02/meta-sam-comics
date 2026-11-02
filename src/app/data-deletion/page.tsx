@@ -30,7 +30,7 @@ export default async function DataDeletion() {
           ) : (
             "the contact address listed on this app's Facebook page"
           )}{" "}
-          from the address on your Facebook or Google account.
+          from the address on your Facebook account.
         </li>
         <li>Use the subject &quot;Delete my data&quot;.</li>
         <li>If you used <Brand /> as a guest, include the link to a comic you made, so we can find it.</li>

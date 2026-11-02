@@ -117,7 +117,7 @@ export default async function ComicPage({ params }: Params) {
               title={`${comic.chapterTitle} — ${comic.seriesTitle}`}
             />
             {isGuest(user?.id) ? (
-              <p className="guest-share-note">Sign in with Facebook to share your comic.</p>
+              <p className="guest-share-note">Sign in with Facebook to post the link.</p>
             ) : (
               <a href={facebookShareUrl(comic.id)} className="action" target="_blank" rel="noopener noreferrer">
                 <ShareIcon /> Post link to Facebook

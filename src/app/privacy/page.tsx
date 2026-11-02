@@ -21,8 +21,8 @@ export default async function Privacy() {
 
       <h2>When you sign in</h2>
       <p>
-        With Facebook or Google we receive your name, profile picture and email address, and an id that
-        identifies your account with that provider. We do not ask to post on your behalf, read your friends or
+        With Facebook we receive your name, profile picture and email address, and an id that identifies
+        your account. We do not ask to post on your behalf, read your friends or
         access your messages.
       </p>
       <p>
@@ -52,7 +52,10 @@ export default async function Privacy() {
       </p>
 
       <h2>Sharing</h2>
-      <p>Nothing is posted to Facebook unless you press Share and confirm it in Facebook&apos;s own dialog.</p>
+      <p>
+        Nothing is ever posted for you. When you choose to post a comic&apos;s link or share its video, you
+        confirm it yourself, in Facebook&apos;s own dialog or your phone&apos;s share sheet.
+      </p>
 
       <h2>Deleting your data</h2>
       <p>
