@@ -9,24 +9,27 @@ interface Unfinished {
   id: string;
   state: "running" | "failed";
   percent: number;
+  label: string;
 }
 
-type Bubble = { kind: "running"; id: string; percent: number; count: number } | { kind: "failed"; id: string } | { kind: "ready"; id: string };
+/** One bubble per comic: being made, failed, or done and not opened yet. */
+type Bubble = Unfinished | { id: string; state: "ready"; label: string };
 
 const POLL_MS = 5000;
 
 /**
- * A comic takes minutes, and the progress page says the reader can leave. This
- * bubble follows them around the app: how far along their comic is, and one
- * tap back to it — then "Ready" when it is done, or a red mark if it failed.
- * Hidden on the comic's own page, which already shows all of it.
+ * A comic takes minutes, and the progress page says the reader can leave. These
+ * bubbles follow them around the app, one per comic: how far along it is, and
+ * one tap back to it — then "Ready" when it is done, or a red mark if it failed.
+ * A comic's bubble is hidden on that comic's own page, which already shows it all.
  */
 export function ProgressBubble() {
   const { status } = useSession();
   const pathname = usePathname();
-  const [bubble, setBubble] = useState<Bubble | null>(null);
-  // Comics seen running: when one leaves the list, it either finished or failed.
-  const watched = useRef(new Set<string>());
+  const [unfinished, setUnfinished] = useState<Unfinished[]>([]);
+  const [ready, setReady] = useState<Array<{ id: string; label: string }>>([]);
+  // Comics seen running, with their label: when one leaves the list, it is done.
+  const watched = useRef(new Map<string, string>());
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -38,28 +41,15 @@ export function ProgressBubble() {
         const res = await fetch("/api/me/unfinished", { cache: "no-store" });
         const { comics } = (await res.json()) as { comics: Unfinished[] };
         if (stop) return;
-        const running = comics.filter((c) => c.state === "running");
-        const failed = comics.find((c) => c.state === "failed");
-
-        let ready: string | null = null;
-        for (const id of watched.current) {
+        const finished: Array<{ id: string; label: string }> = [];
+        for (const [id, label] of watched.current) {
           if (comics.some((c) => c.id === id)) continue;
           watched.current.delete(id);
-          // Left the list without failing: it is done.
-          ready = id;
+          finished.push({ id, label });
         }
-        for (const c of running) watched.current.add(c.id);
-
-        setBubble((prev) => {
-          if (running.length > 0) {
-            const slowest = running.reduce((a, b) => (b.percent < a.percent ? b : a));
-            return { kind: "running", id: slowest.id, percent: slowest.percent, count: running.length };
-          }
-          if (ready) return { kind: "ready", id: ready };
-          if (failed) return { kind: "failed", id: failed.id };
-          // A "ready" bubble stays until it is opened.
-          return prev?.kind === "ready" ? prev : null;
-        });
+        for (const c of comics) if (c.state === "running") watched.current.set(c.id, c.label);
+        setUnfinished(comics);
+        if (finished.length > 0) setReady((r) => [...finished, ...r]);
       } catch {
         // Network blip: try again on the next tick.
       }
@@ -72,43 +62,55 @@ export function ProgressBubble() {
     };
   }, [status]);
 
-  // Finished while the reader was watching it: there is nothing left to point to.
+  // Opening a finished comic is what "Ready" was asking for.
   useEffect(() => {
-    if (bubble?.kind === "ready" && pathname === `/c/${bubble.id}`) setBubble(null);
-  }, [bubble, pathname]);
+    setReady((r) => r.filter((b) => pathname !== `/c/${b.id}`));
+  }, [pathname]);
 
-  if (!bubble || pathname === `/c/${bubble.id}`) return null;
+  const bubbles: Bubble[] = [...ready.map((r) => ({ ...r, state: "ready" as const })), ...unfinished].filter(
+    (b) => pathname !== `/c/${b.id}`,
+  );
+  if (bubbles.length === 0) return null;
 
-  const href = `/c/${bubble.id}`;
-  const clear = () => bubble.kind === "ready" && setBubble(null);
-
-  if (bubble.kind === "ready") {
-    return (
-      <Link href={href} className="bubble bubble-ready" onClick={clear} aria-label="Your comic is ready — open it">
-        <span className="bubble-ring">✓</span>
-        <span className="bubble-label">Ready</span>
-      </Link>
-    );
-  }
-  if (bubble.kind === "failed") {
-    return (
-      <Link href={href} className="bubble bubble-failed" aria-label="A comic of yours didn’t finish — see what happened">
-        <span className="bubble-ring">!</span>
-        <span className="bubble-label">Didn’t finish</span>
-      </Link>
-    );
-  }
-  const deg = Math.round((bubble.percent / 100) * 360);
   return (
-    <Link
-      href={href}
-      className="bubble"
-      aria-label={`Your comic is being made: ${bubble.percent}% — see progress`}
-    >
-      <span className="bubble-ring" style={{ background: `conic-gradient(var(--accent) ${deg}deg, var(--surface-2) 0)` }}>
-        <span className="bubble-percent">{bubble.percent}%</span>
-      </span>
-      <span className="bubble-label">{bubble.count > 1 ? `${bubble.count} comics` : "Your comic"}</span>
-    </Link>
+    <div className="bubbles">
+      {bubbles.map((b) => {
+        const href = `/c/${b.id}`;
+        if (b.state === "ready") {
+          return (
+            <Link key={b.id} href={href} className="bubble bubble-ready" aria-label={`Your comic is ready: ${b.label}`}>
+              <span className="bubble-ring">✓</span>
+              <span className="bubble-text">
+                <span className="bubble-label">Ready</span>
+                <span className="bubble-idea">{b.label}</span>
+              </span>
+            </Link>
+          );
+        }
+        if (b.state === "failed") {
+          return (
+            <Link key={b.id} href={href} className="bubble bubble-failed" aria-label={`Didn’t finish: ${b.label}`}>
+              <span className="bubble-ring">!</span>
+              <span className="bubble-text">
+                <span className="bubble-label">Didn’t finish</span>
+                <span className="bubble-idea">{b.label}</span>
+              </span>
+            </Link>
+          );
+        }
+        const deg = Math.round((b.percent / 100) * 360);
+        return (
+          <Link key={b.id} href={href} className="bubble" aria-label={`Being made, ${b.percent}%: ${b.label}`}>
+            <span className="bubble-ring" style={{ background: `conic-gradient(var(--accent) ${deg}deg, var(--surface-2) 0)` }}>
+              <span className="bubble-percent">{b.percent}%</span>
+            </span>
+            <span className="bubble-text">
+              <span className="bubble-label">Being made</span>
+              <span className="bubble-idea">{b.label}</span>
+            </span>
+          </Link>
+        );
+      })}
+    </div>
   );
 }
