@@ -446,6 +446,49 @@ img, video { max-width: 100%; display: block; }
 .retry-detail { margin: 0; font-size: 12px; overflow-wrap: anywhere; }
 .retry-title { margin: 0; font-size: 17px; font-weight: 600; }
 
+/* The progress bubble: the reader's comic, following them around the app. */
+.bubble {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  animation: bubble-in 0.25s ease-out;
+}
+.bubble:hover { border-color: var(--accent); }
+.bubble-ring {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-weight: 800;
+}
+.bubble-percent {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface);
+  font-size: 12px;
+}
+.bubble-ready .bubble-ring { background: var(--gem); color: #1c1e21; font-size: 20px; }
+.bubble-failed .bubble-ring { background: var(--danger); color: #fff; font-size: 20px; }
+@keyframes bubble-in { from { opacity: 0; transform: translateY(12px); } }
+@media (prefers-reduced-motion: reduce) { .bubble { animation: none; } }
+
 /* 404 and error pages: a card in the feed, never a blank screen. */
 .notice { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 40px 20px; }
 .notice h1 { margin: 0; font-size: 22px; }

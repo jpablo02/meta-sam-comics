@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/session";
 import { startComic } from "@/lib/jobs";
 import { isGuest } from "@/lib/auth";
-import { comicsStartedBy, getStatus, isStalled } from "@/lib/store";
+import { comicsStartedBy, getStatus, isStalled, saveStatus } from "@/lib/store";
 import { GUEST_COMICS } from "@/lib/ideaRules";
 
 /**
@@ -28,5 +28,8 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   }
 
   // status.idea already carries the gem hint.
-  return NextResponse.json({ id: await startComic(user, status.idea) });
+  const newId = await startComic(user, status.idea);
+  // The old one is settled: failed, and replaced — it leaves the home page's list.
+  await saveStatus({ ...status, state: "failed", retriedAs: newId });
+  return NextResponse.json({ id: newId });
 }

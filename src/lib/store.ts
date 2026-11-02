@@ -75,6 +75,8 @@ export interface ComicStatus {
   idea?: string;
   /** Set on every save: how long the comic has gone without a step. */
   updatedAt?: string;
+  /** A failed comic tried again: the id of the new one, so the old one stops asking for attention. */
+  retriedAs?: string;
 }
 
 /**
@@ -178,6 +180,40 @@ export async function saveComic(comic: StoredComic): Promise<void> {
 }
 
 /** Comics this author has made or is making. Failed ones don't count. */
+/** How long a failed comic keeps showing on its author's home page. */
+const UNFINISHED_MS = 6 * 3600 * 1000;
+
+/**
+ * The author's comics still being made, and the ones that failed recently and
+ * were not tried again — newest first. The progress page says "you can leave";
+ * this is how the reader finds their way back.
+ */
+export async function unfinishedBy(authorId: string): Promise<ComicStatus[]> {
+  const sql = await db();
+  let statuses: ComicStatus[];
+  if (sql) {
+    const { rows } = await sql.query(
+      "SELECT data FROM statuses WHERE data->'author'->>'id' = $1 AND data->>'state' IN ('running', 'failed') " +
+        "ORDER BY data->>'createdAt' DESC LIMIT 10",
+      [authorId],
+    );
+    statuses = rows.map((r) => r.data as ComicStatus);
+  } else {
+    const root = join(DATA_DIR, "comics");
+    if (!existsSync(root)) return [];
+    const all = await Promise.all((await readdir(root)).map((id) => readJson<ComicStatus>(join(root, id, "status.json"))));
+    statuses = all.filter((s): s is ComicStatus => s?.author.id === authorId && s.state !== "done");
+  }
+  return statuses
+    .filter((s) =>
+      s.state === "running" && !isStalled(s)
+        ? true
+        : !s.retriedAs && Date.now() - Date.parse(s.updatedAt ?? s.createdAt) < UNFINISHED_MS,
+    )
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 3);
+}
+
 export async function comicsStartedBy(authorId: string): Promise<number> {
   const sql = await db();
   if (sql) {
