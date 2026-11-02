@@ -1,13 +1,14 @@
 import { APP_NAME } from "@/lib/brand";
 import { currentUser } from "@/lib/session";
 import { LegalPage } from "@/components/LegalPage";
+import { Brand } from "@/components/NoTranslate";
 
 /**
  * Facebook Login requires a data deletion instructions URL (or callback) before
  * an app can go Live. Instructions are enough for an app that stores no data
  * Facebook would need to be told about.
  */
-export const metadata = { title: `Data deletion — ${APP_NAME}` };
+export const metadata = { title: `Data deletion — $<Brand />` };
 
 export default async function DataDeletion() {
   const user = await currentUser();
@@ -17,7 +18,7 @@ export default async function DataDeletion() {
   return (
     <LegalPage user={user} title="Delete your data" updated="October 31, 2026">
       <p className="legal-lead">
-        You can have your account and everything you made with {APP_NAME} deleted at any time.
+        You can have your account and everything you made with <Brand /> deleted at any time.
       </p>
 
       <h2>How to ask</h2>
@@ -25,14 +26,14 @@ export default async function DataDeletion() {
         <li>
           Email{" "}
           {contact ? (
-            <a href={`mailto:${contact}?subject=Delete%20my%20data`}>{contact}</a>
+            <a href={`mailto:${contact}?subject=Delete%20my%20data`} translate="no">{contact}</a>
           ) : (
             "the contact address listed on this app's Facebook page"
           )}{" "}
           from the address on your Facebook or Google account.
         </li>
         <li>Use the subject &quot;Delete my data&quot;.</li>
-        <li>If you used {APP_NAME} as a guest, include the link to a comic you made, so we can find it.</li>
+        <li>If you used <Brand /> as a guest, include the link to a comic you made, so we can find it.</li>
       </ol>
 
       <h2>What is deleted</h2>
@@ -45,7 +46,7 @@ export default async function DataDeletion() {
 
       <h2>Remove the app from Facebook</h2>
       <p>
-        You can also disconnect {APP_NAME} from your Facebook account at any time, under Settings → Apps and
+        You can also disconnect <Brand /> from your Facebook account at any time, under Settings → Apps and
         Websites.
       </p>
     </LegalPage>

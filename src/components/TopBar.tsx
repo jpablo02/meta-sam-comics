@@ -10,7 +10,7 @@ export function TopBar({ user, wide = false }: { user: Author | null; wide?: boo
     <header className="topbar">
       <div className={wide ? "topbar-inner wide" : "topbar-inner"}>
         <div className="topbar-start">
-          <Link href="/" className="brand">
+          <Link href="/" className="brand" translate="no">
             {APP_NAME}
           </Link>
           {user && (

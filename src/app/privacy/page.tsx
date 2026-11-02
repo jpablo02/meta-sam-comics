@@ -2,19 +2,20 @@ import Link from "next/link";
 import { APP_NAME } from "@/lib/brand";
 import { currentUser } from "@/lib/session";
 import { LegalPage } from "@/components/LegalPage";
+import { Brand } from "@/components/NoTranslate";
 
 /**
  * Facebook Login requires a public privacy policy URL before an app can go
  * Live. This states what the app actually does — keep it in step with the code.
  */
-export const metadata = { title: `Privacy — ${APP_NAME}` };
+export const metadata = { title: `Privacy — $<Brand />` };
 
 export default async function Privacy() {
   const user = await currentUser();
   return (
     <LegalPage user={user} title="Privacy" updated="October 31, 2026">
       <p className="legal-lead">
-        {APP_NAME} turns a story idea you write into a comic. This page explains what we receive, what we keep
+        <Brand /> turns a story idea you write into a comic. This page explains what we receive, what we keep
         and who can see it.
       </p>
 
@@ -39,7 +40,7 @@ export default async function Privacy() {
 
       <h2>Who can see it</h2>
       <p>
-        Comics are made to be read: each one appears in the {APP_NAME} feed with its author&apos;s name and
+        Comics are made to be read: each one appears in the <Brand /> feed with its author&apos;s name and
         picture, and other readers can read it and collect its gem. Your email is never shown.
       </p>
 

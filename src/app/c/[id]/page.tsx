@@ -9,7 +9,8 @@ import { comicPath, facebookShareUrl, fileUrl, siteUrl } from "@/lib/urls";
 import { GemCard } from "@/components/GemCard";
 import { ProgressView } from "@/components/ProgressView";
 import { TopBar } from "@/components/TopBar";
-import { Avatar, PlayIcon, ShareIcon, timeAgo } from "@/components/ui";
+import { ShareReelButton } from "@/components/ShareReelButton";
+import { Avatar, ShareIcon, timeAgo } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -80,7 +81,7 @@ export default async function ComicPage({ params }: Params) {
             <Avatar name={comic.author.name} image={comic.author.image} />
             <div className="post-head-text">
               <span className="post-author">
-                {comic.author.name} <span>made a comic</span>
+                <span translate="no">{comic.author.name}</span> <span>made a comic</span>
               </span>
               <span className="post-meta">
                 {timeAgo(comic.createdAt)} · {comic.seriesTitle}
@@ -110,9 +111,11 @@ export default async function ComicPage({ params }: Params) {
           </div>
 
           <div className="actions" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-            <a href={fileUrl(comic.id, comic.reel)} className="action" download>
-              <PlayIcon /> Download reel
-            </a>
+            <ShareReelButton
+              src={fileUrl(comic.id, comic.reel)}
+              filename={`${comic.chapterTitle.replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-").toLowerCase() || "tales"}.mp4`}
+              title={`${comic.chapterTitle} — ${comic.seriesTitle}`}
+            />
             {isGuest(user?.id) ? (
               <p className="guest-share-note">Sign in with Facebook to share your comic.</p>
             ) : (

@@ -47,7 +47,7 @@ export function Landing({ providers, exampleId }: { providers: Array<"facebook" 
       </div>
 
       <div className="landing-content">
-        <h1 className="landing-title">{APP_NAME}</h1>
+        <h1 className="landing-title" translate="no">{APP_NAME}</h1>
         <p className="landing-tagline">{APP_TAGLINE}</p>
         <p className="landing-sub">Turn your ideas into comics. Share them and watch your followers collect them.</p>
 

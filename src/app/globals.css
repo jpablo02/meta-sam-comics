@@ -252,6 +252,10 @@ img, video { max-width: 100%; display: block; }
   border-radius: 6px;
 }
 .action:hover { background: var(--bg); }
+.action:disabled { cursor: progress; opacity: 0.7; }
+.share-reel { display: flex; flex-direction: column; }
+.share-reel .action { width: 100%; }
+.share-reel-note { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-align: center; }
 
 .gem-row {
   margin: 0 16px;

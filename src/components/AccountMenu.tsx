@@ -35,7 +35,7 @@ export function AccountMenu({ name, image }: { name: string; image?: string | nu
       </button>
       {open && (
         <div className="account-menu" role="menu">
-          <span className="account-name">{name}</span>
+          <span className="account-name" translate="no">{name}</span>
           <button type="button" role="menuitem" className="account-item" onClick={() => signOut({ callbackUrl: "/" })}>
             Sign out
           </button>

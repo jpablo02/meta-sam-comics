@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { APP_NAME, APP_TAGLINE } from "@/lib/brand";
+import { N, keepNames } from "@/components/NoTranslate";
 
 export const metadata: Metadata = {
   title: `How it works · ${APP_NAME}`,
@@ -49,7 +50,7 @@ function Step({
       <div className="how-step-text">
         <span className="how-step-n">{String(n).padStart(2, "0")}</span>
         <h2>{title}</h2>
-        <span className="how-chip">{model}</span>
+        <span className="how-chip" translate="no">{model}</span>
         <div className="how-copy">{children}</div>
       </div>
       <div className="how-step-art">{art}</div>
@@ -73,7 +74,7 @@ export default function HowItWorks() {
           ← Home
         </Link>
         <div className="how-hero-content">
-          <Link href="/" className="how-brand">
+          <Link href="/" className="how-brand" translate="no">
             {APP_NAME}
           </Link>
           <h1>How it works</h1>
@@ -84,12 +85,12 @@ export default function HowItWorks() {
       <div className="how-body">
         <Step n={1} title="You write an idea" model="Muse Spark" art={<blockquote className="how-idea">“{IDEA}”</blockquote>}>
           <p>
-            A sentence or two, in Spanish or English. Muse Spark turns it into a four-panel script in English: the
+            A sentence or two, in Spanish or English. <N>Muse Spark</N> turns it into a four-panel script in English: the
             cast, the places, what happens and who says what.
           </p>
           <p>
             And the <strong>gem</strong> — one object inside the story that readers will want to keep. You name it,
-            or press Suggest and Muse Spark proposes one from your idea. Here, the bottle. What the letter inside it
+            or press Suggest and <N>Muse Spark</N> proposes one from your idea. Here, the bottle. What the letter inside it
             says is written now, and kept back.
           </p>
         </Step>
@@ -149,8 +150,8 @@ export default function HowItWorks() {
           }
         >
           <p>
-            The art is finished, so now it is <em>read</em>. Muse Wonder knows from the script which object to look
-            for and how to ask for it. SAM 3.1 cuts it out of each panel, edge to edge. Muse Wonder then checks the
+            The art is finished, so now it is <em>read</em>. <N>Muse Wonder</N> knows from the script which object to look
+            for and how to ask for it. <N>SAM 3.1</N> cuts it out of each panel, edge to edge. <N>Muse Wonder</N> then checks the
             cut-out: is this really the bottle from the story?
           </p>
           <p>That is how the app knows where the gem is in every panel — and what the gem looks like on its card.</p>
@@ -163,7 +164,7 @@ export default function HowItWorks() {
           art={<Img src="/how/lettered-3.webp" alt="Panel 3 with two speech bubbles placed around the faces" className="how-single" />}
         >
           <p>
-            SAM finds every face in the panel — the ones speaking and the ones listening. The bubbles are then laid
+            <N>SAM</N> finds every face in the panel — the ones speaking and the ones listening. The bubbles are then laid
             out together, the way a letterer would: in reading order, one per speaker, each tail pointing at the one
             who speaks, never over a face — and never over the gem.
           </p>
@@ -184,7 +185,7 @@ export default function HowItWorks() {
         >
           <p>
             Two cards of the same object. The one everybody sees keeps the writing blurred. The one a collector
-            gets carries the real words — written by Muse Spark, drawn into the object by Muse Image: ink in the
+            gets carries the real words — written by <N>Muse Spark</N>, drawn into the object by <N>Muse Image</N>: ink in the
             paper, letters cut into metal. They tell you something the comic did not.
           </p>
           <p className="how-hint">Hover the card to reveal it.</p>
@@ -212,8 +213,8 @@ export default function HowItWorks() {
           <div className="how-models-grid">
             {MODELS.map((m) => (
               <div key={m.name} className="how-model">
-                <strong>{m.name}</strong>
-                <span>{m.does}</span>
+                <strong translate="no">{m.name}</strong>
+                <span>{keepNames(m.does)}</span>
               </div>
             ))}
           </div>

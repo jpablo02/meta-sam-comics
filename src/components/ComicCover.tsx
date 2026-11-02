@@ -17,7 +17,7 @@ export function ComicCover({ comic, collected, canShare = true }: { comic: Store
         <Avatar name={comic.author.name} image={comic.author.image} />
         <div className="post-head-text">
           <span className="post-author">
-            {comic.author.name} <span>made a comic</span>
+            <span translate="no">{comic.author.name}</span> <span>made a comic</span>
           </span>
           <span className="post-meta">{timeAgo(comic.createdAt)}</span>
         </div>
