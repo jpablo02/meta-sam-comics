@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/session";
 import { startComic } from "@/lib/jobs";
 import { isGuest } from "@/lib/auth";
-import { comicsStartedBy, getStatus } from "@/lib/store";
+import { comicsStartedBy, getStatus, isStalled } from "@/lib/store";
 import { GUEST_COMICS } from "@/lib/ideaRules";
 
 /**
@@ -17,7 +17,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   const status = await getStatus(id).catch(() => null);
   if (!status || status.author.id !== user.id) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (status.state !== "failed" || !status.idea) {
+  if ((status.state !== "failed" && !isStalled(status)) || !status.idea) {
     return NextResponse.json({ error: "This comic cannot be tried again." }, { status: 409 });
   }
   if (isGuest(user.id) && (await comicsStartedBy(user.id)) >= GUEST_COMICS) {

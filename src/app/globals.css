@@ -445,6 +445,23 @@ img, video { max-width: 100%; display: block; }
 .retry { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .retry-detail { margin: 0; font-size: 12px; overflow-wrap: anywhere; }
 .retry-title { margin: 0; font-size: 17px; font-weight: 600; }
+
+/* 404 and error pages: a card in the feed, never a blank screen. */
+.notice { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 40px 20px; }
+.notice h1 { margin: 0; font-size: 22px; }
+.notice p { margin: 0; max-width: 420px; }
+.notice-mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--gem-soft);
+  color: var(--gem-ink);
+  font-size: 26px;
+  font-weight: 800;
+}
+.notice-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
 .retry-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }

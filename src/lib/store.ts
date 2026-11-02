@@ -73,6 +73,21 @@ export interface ComicStatus {
   drawn?: number[];
   /** The idea as the script writer received it, so a failed comic can be tried again. Never sent to the browser. */
   idea?: string;
+  /** Set on every save: how long the comic has gone without a step. */
+  updatedAt?: string;
+}
+
+/**
+ * No step for this long means the run died — the server restarted, the job was
+ * killed — and nothing will ever mark it failed. The slowest step, a panel
+ * falling down every rung of the filter ladder, takes a few minutes.
+ */
+const STALLED_MS = 20 * 60 * 1000;
+
+export function isStalled(status: ComicStatus): boolean {
+  if (status.state !== "running") return false;
+  const last = Date.parse(status.updatedAt ?? status.createdAt);
+  return Number.isFinite(last) && Date.now() - last > STALLED_MS;
 }
 
 export interface Collection {
@@ -136,6 +151,7 @@ export async function getStatus(id: string): Promise<ComicStatus | null> {
 }
 
 export async function saveStatus(status: ComicStatus): Promise<void> {
+  status = { ...status, updatedAt: new Date().toISOString() };
   const sql = await db();
   if (sql) {
     await sql.query(

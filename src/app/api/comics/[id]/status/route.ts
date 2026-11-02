@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { comicDir, getStatus } from "@/lib/store";
+import { comicDir, getStatus, isStalled } from "@/lib/store";
 import { PANEL_COUNT } from "@/lib/writeScript";
 
-/** Progress of a comic being made, and which panels are already drawn. */
+/**
+ * Progress of a comic being made, and which panels are already drawn.
+ *
+ * What went wrong is never sent as the error text itself — a reader cannot act
+ * on "The story object … was not found in any of its panels" or the API's JSON.
+ * The page gets the kind of failure and explains it in words; the details stay
+ * in the server log.
+ */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const status = await getStatus(id).catch(() => null);
@@ -19,17 +26,22 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       if (existsSync(join(dir, `panel-${n}.png`))) drawn.push(n);
     }
   }
-  // A refusal from Meta's content filter is the reader's to act on, not a bug:
-  // the page explains it in words instead of showing the API's JSON.
-  const filtered = /content_policy_violation/.test(status.error ?? "");
+
+  const stalled = isStalled(status);
+  const reason = stalled
+    ? "stalled"
+    : status.state !== "failed"
+      ? undefined
+      : /content_policy_violation/.test(status.error ?? "")
+        ? "filtered"
+        : "error";
   return NextResponse.json(
     // The idea stays on the server: only whether it can be tried again goes out.
     {
-      state: status.state,
+      state: stalled ? "failed" : status.state,
       step: status.step,
       detail: status.detail,
-      error: filtered ? undefined : status.error,
-      filtered,
+      reason,
       drawn,
       canRetry: Boolean(status.idea),
     },

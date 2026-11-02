@@ -21,12 +21,32 @@ interface Status {
   state: "running" | "done" | "failed";
   step: string;
   detail?: string;
-  error?: string;
   drawn: number[];
   canRetry?: boolean;
-  /** Meta's content filter refused a picture, over and over. */
-  filtered?: boolean;
+  /** Why it failed: Meta's content filter, a run that stopped answering, or anything else. */
+  reason?: "filtered" | "stalled" | "error";
 }
+
+/** What a reader is told, by kind of failure. Never the raw error. */
+const FAILURES = {
+  filtered: {
+    title: "Meta’s safety filter stopped one of the pictures.",
+    body:
+      "The image model often refuses scenes with fire, injuries, blood, weapons or violence — even gentle " +
+      "ones. Trying again sometimes works. If it keeps happening, tell the same story through a calmer " +
+      "moment: a memory, a look, the object in someone’s hands.",
+  },
+  stalled: {
+    title: "This comic stopped making progress.",
+    body: "The run behind it was interrupted before it finished. Nothing was lost on your side — start it again.",
+  },
+  error: {
+    title: "This comic didn’t come out right.",
+    body:
+      "One of the models answered in a way the studio couldn’t use. It isn’t your idea: the same idea " +
+      "usually works on a second try.",
+  },
+} as const;
 
 /**
  * The wait, shown honestly: every line ticks when that step has really
@@ -97,18 +117,10 @@ export function ProgressView({ id, total }: { id: string; total: number }) {
       <section className="card">
         {status?.state === "failed" ? (
           <div className="retry">
-            {status.filtered ? (
-              <>
-                <p className="retry-title">Meta&apos;s safety filter stopped one of the pictures.</p>
-                <p className="muted" style={{ margin: 0 }}>
-                  The image model often refuses scenes with fire, injuries, blood, weapons or violence — even
-                  gentle ones. Trying again sometimes works. If it keeps happening, tell the same story through
-                  a calmer moment: a memory, a look, the object in someone&apos;s hands.
-                </p>
-              </>
-            ) : (
-              <p className="error" style={{ margin: 0 }}>Something went wrong while making this comic.</p>
-            )}
+            <p className="retry-title">{FAILURES[status.reason ?? "error"].title}</p>
+            <p className="muted" style={{ margin: 0 }}>
+              {FAILURES[status.reason ?? "error"].body}
+            </p>
             <div className="retry-actions">
               {status.canRetry && (
                 <button type="button" className="button" onClick={retry} disabled={retrying}>
@@ -120,7 +132,6 @@ export function ProgressView({ id, total }: { id: string; total: number }) {
               </Link>
             </div>
             {retryError && <p className="error" style={{ margin: 0 }}>{retryError}</p>}
-            {status.error && <p className="muted retry-detail">{status.error}</p>}
           </div>
         ) : (
           <ol className="steps">

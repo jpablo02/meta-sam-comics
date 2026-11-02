@@ -37,6 +37,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       type: "article",
       images: [{ url: image, width: 1080, height: 1620, alt: `${comic.gem.name}, its contents hidden` }],
     },
+    // X shows a large picture only when asked to.
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: `${comic.logline} A gem is hidden in this story.`,
+      images: [image],
+    },
   };
 }
 
