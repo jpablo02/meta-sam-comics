@@ -13,6 +13,26 @@ const IDEA =
   "Camila es una pescadora joven de Cartagena… Al amanecer saca de la red una botella verde con un papel " +
   "enrollado adentro. Se la muestra a su abuelo Ramiro, que palidece al reconocerla y se niega a abrirla.";
 
+/** What the models did that we did not expect — each one measured while building Tales. */
+const SURPRISES = [
+  {
+    title: "Muse Image writes, if you let it carve",
+    body: "Ask it for a caption and it spells badly. Ask it to engrave the gem's exact words into the object — ink soaked into paper, letters cut into wood — and the words come out right, in the object's own material.",
+  },
+  {
+    title: "Muse Image keeps a place without copying the shot",
+    body: "Give it an empty picture of a room and it draws the same room from a new angle in every panel — the same window, the same table — instead of pasting the reference's camera.",
+  },
+  {
+    title: "Muse Wonder can direct SAM",
+    body: "It writes the words SAM 3.1 searches with, looks at what SAM cut out, and says no when it is the wrong thing. Together they find an object neither would find alone.",
+  },
+  {
+    title: "SAM 3.1 sees who is silent",
+    body: "It finds every face in a drawn panel, including the characters who say nothing — which is what lets the bubbles go where nobody is.",
+  },
+];
+
 const MODELS = [
   {
     name: "Muse Spark",
@@ -82,7 +102,7 @@ export default function HowItWorks() {
             {APP_NAME}
           </Link>
           <h1>How it works</h1>
-          <p>One idea. Four Meta models. A story with something worth keeping.</p>
+          <p>One idea. Four Meta models. A finished comic in minutes — with something worth keeping.</p>
         </div>
       </header>
 
@@ -226,6 +246,19 @@ export default function HowItWorks() {
                 <strong translate="no">{m.name}</strong>
                 <em className="how-model-role">{m.role}</em>
                 <span>{keepNames(m.does)}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="how-models">
+          <h2>What surprised us</h2>
+          <p className="how-models-lead">Things we did not know these models could do until we built Tales.</p>
+          <div className="how-models-grid">
+            {SURPRISES.map((s) => (
+              <div key={s.title} className="how-model">
+                <strong>{keepNames(s.title)}</strong>
+                <span>{keepNames(s.body)}</span>
               </div>
             ))}
           </div>

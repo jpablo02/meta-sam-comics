@@ -13,7 +13,7 @@
 from the story that readers collect. Everyone sees the gem; only the people who collect it can read
 what is written on it, and what it says changes how the story reads.
 
-Write `un perro`, or `something scary in the forest`. A few minutes later you have a comic with a
+From an idea to a finished comic in minutes. Write `un perro`, or `something scary in the forest`. A few minutes later you have a comic with a
 cast, a place, dialogue lettered around the faces, a cover, a reel — and a gem waiting to be found.
 
 <p align="center">
@@ -38,6 +38,20 @@ work. No step trusts the one before it.
 segments the panel; Muse Wonder looks at the cut-out and decides whether it is really the gem. A wrong
 find is rejected and Wonder tries again, told which phrases already failed. Muse Wonder also writes the
 phrase SAM uses to find each character's face, so the bubbles can be placed where nobody is.
+
+## What surprised us
+
+Things we did not know these models could do until we built Tales — each one measured, not assumed.
+
+- **Muse Image writes, if you let it carve.** Ask it for a caption and it spells badly. Ask it to engrave
+  the gem's exact words into the object — ink soaked into paper, letters cut into wood — and the words
+  come out right, in the object's own material.
+- **Muse Image keeps a place without copying the shot.** Give it an empty picture of a room and it draws
+  the same room from a new angle in every panel, instead of pasting the reference's camera.
+- **Muse Wonder can direct SAM.** It writes the words SAM 3.1 searches with, looks at what SAM cut out,
+  and says no when it is the wrong thing. Together they find an object neither would find alone.
+- **SAM 3.1 sees who is silent.** It finds every face in a drawn panel, including the characters who say
+  nothing — which is what lets the bubbles go where nobody is.
 
 ## How a comic holds together
 
