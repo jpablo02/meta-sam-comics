@@ -54,9 +54,10 @@ function basePrompt({
     "the same number of pieces opening the same way — never an extra lid, leaf or compartment.",
     // "Filling most of the frame" made a vertical card stretch what is long and thin:
     // a cinema ticket became a folded letter, a dog collar a strip cut off at both edges.
-    "Keep its REAL proportions: never stretched, enlarged or reshaped to fill the frame. A long,",
-    "thin object (a ticket, a spoon, a collar, a key) lies on a diagonal, whole, with dark space",
-    "around it. It is shown flat and front-facing. No hands, no people.",
+    // No examples of objects here: listing "a key" among them put a brass key beside a photo.
+    "Keep its REAL proportions: never stretched, enlarged or reshaped to fill the frame. If it",
+    "is long and thin it lies on a diagonal, whole, with dark space around it. It is shown flat",
+    "and front-facing. It is the ONLY object in the frame — nothing beside it. No hands, no people.",
   ];
 }
 
