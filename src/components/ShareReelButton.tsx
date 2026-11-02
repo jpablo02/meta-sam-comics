@@ -50,7 +50,7 @@ export function ShareReelButton({ src, filename, title }: { src: string; filenam
   return (
     <div className="share-reel">
       <button type="button" className="action" onClick={share} disabled={busy}>
-        <PlayIcon /> {busy ? "Preparing…" : "Share as Reel"}
+        <PlayIcon /> {busy ? "Preparing…" : "Share video"}
       </button>
       {note && <p className="share-reel-note">{note}</p>}
     </div>

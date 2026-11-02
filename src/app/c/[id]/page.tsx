@@ -21,12 +21,12 @@ async function load(id: string) {
   return getComic(id).catch(() => null);
 }
 
-/** What Facebook shows when the page is shared: the gem, its contents blurred. */
+/** What Facebook and X show when the page is shared: the comic's cover, with its title and story. */
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const comic = await load((await params).id);
   if (!comic) return { title: APP_NAME };
   const title = `${comic.chapterTitle} — ${comic.seriesTitle}`;
-  const image = `${siteUrl()}${fileUrl(comic.id, comic.gem.teaser, 1080)}&f=jpg`;
+  const image = `${siteUrl()}${fileUrl(comic.id, comic.cover ?? comic.panels[0], 1080)}&f=jpg`;
   return {
     title: `${title} · ${APP_NAME}`,
     description: `${comic.logline} A gem is hidden in this story.`,
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       url: siteUrl() + comicPath(comic.id),
       siteName: APP_NAME,
       type: "article",
-      images: [{ url: image, width: 1080, height: 1620, alt: `${gemTitle(comic.gem.name)}, its contents hidden` }],
+      images: [{ url: image, width: 1080, height: 1620, alt: `The cover of ${comic.chapterTitle}` }],
     },
     // X shows a large picture only when asked to.
     twitter: {
@@ -120,7 +120,7 @@ export default async function ComicPage({ params }: Params) {
               <p className="guest-share-note">Sign in with Facebook to share your comic.</p>
             ) : (
               <a href={facebookShareUrl(comic.id)} className="action" target="_blank" rel="noopener noreferrer">
-                <ShareIcon /> Share to Facebook
+                <ShareIcon /> Post link to Facebook
               </a>
             )}
           </div>

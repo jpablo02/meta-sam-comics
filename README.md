@@ -81,7 +81,7 @@ shaped, in the comments of [`src/lib`](src/lib).
 ## Collect and share
 
 Every gem has 100 numbered copies, given out in the order people collect them. Comics appear in a
-shared feed; signed in with Facebook, you can share one, and its preview is the blurred gem.
+shared feed; signed in with Facebook, you can post one, and its preview is the cover.
 
 ## Architecture
 

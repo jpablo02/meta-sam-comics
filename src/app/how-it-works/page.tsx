@@ -203,7 +203,7 @@ export default function HowItWorks() {
           }
         >
           <p>
-            Try it as a guest, or sign in with Facebook to share the comic — its preview is the blurred gem. Friends
+            Try it as a guest, or sign in with Facebook to share the comic — its preview is the cover. Friends
             who collect it get their numbered copy, and the text only they can read.
           </p>
         </Step>
