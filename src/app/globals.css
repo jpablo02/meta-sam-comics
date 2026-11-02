@@ -932,6 +932,8 @@ img, video { max-width: 100%; display: block; }
   color: rgba(233, 234, 242, 0.8);
 }
 .how-model strong { color: #ffd27a; font-size: 17px; }
+.how-model-role { font-style: normal; font-size: 13px; letter-spacing: 0.4px; text-transform: uppercase; color: rgba(233, 234, 242, 0.55); }
+.how-models-lead { margin: -6px 0 20px; font-size: clamp(16px, 3.6vw, 19px); color: rgba(233, 234, 242, 0.85); max-width: 720px; }
 
 .how-end { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .how-end-tag { margin: 0; font-size: clamp(24px, 6vw, 34px); font-weight: 700; color: #fff; }

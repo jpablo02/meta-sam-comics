@@ -16,19 +16,23 @@ const IDEA =
 const MODELS = [
   {
     name: "Muse Spark",
-    does: "Writes the script from your idea — cast, places, four panels, dialogue — suggests a gem when you ask, and writes the words hidden inside it.",
+    role: "The writer and the editor",
+    does: "Turns two words into a cast, places, four panels and dialogue. If the script breaks a rule the drawing depends on, it gets it back to fix — before a single picture is drawn. It suggests the gem, and writes the words hidden inside it, with a hook for the next chapter.",
   },
   {
     name: "Muse Image",
-    does: "Draws each character, each place and the gem once, then every panel, the cover and the gem's two cards — anchored on those references.",
+    role: "The illustrator who works from references",
+    does: "Draws every character, every place and the gem once — then draws each panel from several of those pictures at once, so nothing drifts. It even engraves the gem's exact words into the object: ink in paper, letters cut into wood.",
   },
   {
     name: "Muse Wonder",
-    does: "Looks at the finished art the way a reader would: decides what to search for — the gem, and every face — and checks that what was found is really the gem.",
+    role: "The reader",
+    does: "Looks at the finished art the way a reader would. It tells SAM what to look for — the gem, every face — and checks that what SAM found is really the gem. A wrong find goes back, with the phrase that failed, until it is.",
   },
   {
     name: "SAM 3.1",
-    does: "Cuts the gem out of the panels pixel by pixel, and finds every face in a panel — speaking or silent — so the bubbles never cover one.",
+    role: "The eyes",
+    does: "Finds the gem in every panel, pixel by pixel, and every face — speaking or silent. The lettering is laid out around what SAM sees, so no bubble ever covers a face or the gem.",
   },
 ];
 
@@ -212,10 +216,15 @@ export default function HowItWorks() {
 
         <section className="how-models">
           <h2>Under the hood</h2>
+          <p className="how-models-lead">
+            Four Meta models, working as one studio: <N>Muse Spark</N> writes, <N>Muse Image</N> draws,{" "}
+            <N>Muse Wonder</N> reads, <N>SAM 3.1</N> sees — and they check each other&apos;s work.
+          </p>
           <div className="how-models-grid">
             {MODELS.map((m) => (
               <div key={m.name} className="how-model">
                 <strong translate="no">{m.name}</strong>
+                <em className="how-model-role">{m.role}</em>
                 <span>{keepNames(m.does)}</span>
               </div>
             ))}
