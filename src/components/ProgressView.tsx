@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PanelStrip } from "./PanelStrip";
@@ -23,6 +24,8 @@ interface Status {
   error?: string;
   drawn: number[];
   canRetry?: boolean;
+  /** Meta's content filter refused a picture, over and over. */
+  filtered?: boolean;
 }
 
 /**
@@ -94,12 +97,28 @@ export function ProgressView({ id, total }: { id: string; total: number }) {
       <section className="card">
         {status?.state === "failed" ? (
           <div className="retry">
-            <p className="error" style={{ margin: 0 }}>Something went wrong while making this comic.</p>
-            {status.canRetry && (
-              <button type="button" className="button" onClick={retry} disabled={retrying}>
-                {retrying ? "Starting…" : "Try again"}
-              </button>
+            {status.filtered ? (
+              <>
+                <p className="retry-title">Meta&apos;s safety filter stopped one of the pictures.</p>
+                <p className="muted" style={{ margin: 0 }}>
+                  The image model often refuses scenes with fire, injuries, blood, weapons or violence — even
+                  gentle ones. Trying again sometimes works. If it keeps happening, tell the same story through
+                  a calmer moment: a memory, a look, the object in someone&apos;s hands.
+                </p>
+              </>
+            ) : (
+              <p className="error" style={{ margin: 0 }}>Something went wrong while making this comic.</p>
             )}
+            <div className="retry-actions">
+              {status.canRetry && (
+                <button type="button" className="button" onClick={retry} disabled={retrying}>
+                  {retrying ? "Starting…" : "Try again"}
+                </button>
+              )}
+              <Link href="/create" className="button secondary">
+                Write a new idea
+              </Link>
+            </div>
             {retryError && <p className="error" style={{ margin: 0 }}>{retryError}</p>}
             {status.error && <p className="muted retry-detail">{status.error}</p>}
           </div>

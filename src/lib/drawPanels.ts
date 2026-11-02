@@ -253,7 +253,10 @@ export async function drawPanel(
     if (!isPolicyRejection(err)) throw err;
   }
 
-  await twice(() => generateImage(panelPrompt(scene, bible), size, outPath));
+  // The last rung is the softened scene too, and gets four tries: a firefighter
+  // pressing a fire-damaged family photo to his chest was refused about seven
+  // times in ten with no references at all, whatever single word was taken out.
+  await twice(() => generateImage(panelPrompt(softened, bible), size, outPath), 4);
   return "no-references";
 }
 
@@ -262,11 +265,12 @@ export async function drawPanel(
  * random: a firefighter's first panel was refused on all three rungs in one run,
  * and the very same prompt passed four times out of four minutes later.
  */
-async function twice(draw: () => Promise<string>): Promise<string> {
-  try {
-    return await draw();
-  } catch (err) {
-    if (!isPolicyRejection(err)) throw err;
-    return draw();
+async function twice(draw: () => Promise<string>, tries = 2): Promise<string> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await draw();
+    } catch (err) {
+      if (!isPolicyRejection(err) || attempt === tries) throw err;
+    }
   }
 }

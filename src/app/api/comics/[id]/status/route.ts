@@ -19,9 +19,20 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       if (existsSync(join(dir, `panel-${n}.png`))) drawn.push(n);
     }
   }
+  // A refusal from Meta's content filter is the reader's to act on, not a bug:
+  // the page explains it in words instead of showing the API's JSON.
+  const filtered = /content_policy_violation/.test(status.error ?? "");
   return NextResponse.json(
     // The idea stays on the server: only whether it can be tried again goes out.
-    { state: status.state, step: status.step, detail: status.detail, error: status.error, drawn, canRetry: Boolean(status.idea) },
+    {
+      state: status.state,
+      step: status.step,
+      detail: status.detail,
+      error: filtered ? undefined : status.error,
+      filtered,
+      drawn,
+      canRetry: Boolean(status.idea),
+    },
     { headers: { "Cache-Control": "no-store" } },
   );
 }
