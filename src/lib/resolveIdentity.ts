@@ -3,8 +3,7 @@
  *
  * SAM opens a fresh track at every panel cut, so one object that appears in
  * three panels comes back as three ids. Stitching those back together is the
- * step SAM cannot do, and — measured — neither can pixel similarity: see
- * docs/identity-resolution.md.
+ * step SAM cannot do, and — measured — neither can pixel similarity.
  *
  * What makes it work is the framing. Asked "are these the same physical
  * object?", Muse Wonder answered no at 0.67 confidence, and it was right: one

@@ -6,8 +6,8 @@
  * chapter with more paperwork in it, that failed twice over — measured:
  *
  *  - SAM answers a phrase with the ONE instance it rates best. "white paper
- *    document" picked papers on Wesley's desk and a note under Zully's phone;
- *    the report in her hands was never a candidate.
+ *    document" picked a paper on a desk and a note under a phone; the report
+ *    in the character's hands was never a candidate.
  *  - Chained pairwise comparison, told that panel-to-panel differences are
  *    normal, merged all three: "the report went from lying on the table to
  *    being held". Plausible, and wrong.
