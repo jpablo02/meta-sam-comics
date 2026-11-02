@@ -1,8 +1,8 @@
 /**
  * Turn a reader's idea into a four-panel script, with Muse Spark.
  *
- * On Token Comic this is a conversation in stages — idea, cast, script — with
- * the creator confirming each one. The demo collapses it into one call, but
+ * A fuller tool would make this a conversation in stages — idea, cast, script —
+ * with the creator confirming each one. The demo collapses it into one call, but
  * keeps the rules those stages were built on, each of which exists because a
  * real chapter came back wrong without it:
  *

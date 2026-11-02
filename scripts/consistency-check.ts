@@ -1,6 +1,6 @@
 /**
  * Can Muse Image hold two characters across four panels?
- * Redraws the sample chapter from its real script with Token Comic's formula.
+ * Redraws the sample chapter from its real script, anchored on character portraits.
  *
  *   npx tsx scripts/consistency-check.ts
  */

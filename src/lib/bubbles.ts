@@ -2,10 +2,9 @@
  * Speech bubbles, placed by looking at the panel and baked into it.
  *
  * Panels are drawn wordless on purpose — an image model asked for a comic draws
- * balloons full of gibberish, and it took Token Comic four rounds to make it
- * stop. So the dialogue is added afterwards. On Token Comic the creator drags
- * each bubble into place in an editor; here nobody does, so placement has to be
- * right on its own:
+ * balloons full of gibberish, and asking it not to does not make it stop. So
+ * the dialogue is added afterwards, and since nobody drags the bubbles into
+ * place, placement has to be right on its own:
  *
  *  - Muse Wonder looks at the panel and writes, for each speaker, the phrase
  *    that finds their face ("face of the girl with braids").

@@ -97,7 +97,7 @@ Done on `feat/polish-round-1`:
 ## Waiting on a decision
 
 - [ ] **Architecture** — owner leans to Google Cloud + Vercel + the domain
-      already paid for Token Comic; Railway is out. Recommendation in the next
+      already owned; Railway is out. Recommendation in the next
       section of the chat: Vercel (web) + Cloud Run Job (pipeline) + Cloud
       Storage (files) + Postgres (comics, collections). Check the contest rules
       on Google services first.

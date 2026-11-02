@@ -5,24 +5,22 @@ What this hackathon build deliberately leaves out, and what comes next.
 The demo is narrow on purpose: one art style, four panels, bubbles placed
 automatically. Each of those is a choice made to ship a complete loop — idea →
 comic → hidden object → collected → shared — in ten days, not a limit of the
-approach. Several of the items below already run in production on
-[Token Comic](https://tokencomic.us), the platform this demo comes from, live
-since July 2024; those are marked **(in production)**.
+approach.
 
 ## Creation
 
 - **More art styles.** The pipeline takes the style as one string; the demo
-  fixes it. Token Comic offers a set of presets with sample images
-  **(in production)** — the same prompt anchors, just exposed.
+  fixes it. A set of presets with sample images is the same prompt anchors,
+  just exposed.
 - **Longer chapters and free page layouts.** Mixed layouts of 1–4 panels per
-  page, chosen by the creator **(in production)**. The demo uses four vertical
+  page, chosen by the creator. The demo uses four vertical
   panels so every chapter reads on a phone and doubles as a Reel.
 - **Series.** Chapter 2 inherits the cast, places and art style of chapter 1
-  through a series bible **(in production)**. Here the collectible's revealed
+  through a series bible. Here the collectible's revealed
   text already plants a hook for the next chapter; the next step is to let that
   hook *start* chapter 2.
-- **Editable bubbles.** Bubbles are placed automatically and baked in. Token
-  Comic lets the creator drag and retype each one **(in production)**.
+- **Editable bubbles.** Bubbles are placed automatically and baked in. The
+  next step is to let the creator drag and retype each one.
 - **Human artists.** Upload your own panels and let the object pipeline (Muse
   Wonder + SAM) find the collectible in hand-drawn art. Nothing in that half of
   the pipeline assumes the art was generated.
@@ -33,12 +31,7 @@ since July 2024; those are marked **(in production)**.
   numbered in the order people collect them (#37 of 100), with a live counter.
   The count is enforced by the database with one atomic update, so two people
   can never get the last copy.
-- **Ownership you can take with you.** Token Comic mints each collected object
-  as a token on Arbitrum **(in production)**, paid by card, with no wallet for
-  the reader to manage. The demo stores collections in a database; the
-  on-chain layer can be switched back on without changing the experience.
-- **Creator earnings.** A share of each collection goes to the comic's creator
-  **(in production on Token Comic)**.
+- **Creator earnings.** A share of each collection goes to the comic's creator.
 
 ## Distribution
 

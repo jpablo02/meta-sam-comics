@@ -1,11 +1,10 @@
 /**
  * What a chapter has to tell the models about itself.
  *
- * Deliberately a plain data shape, not a constant baked into the pipeline. On
- * Token Comic this comes straight out of the session that generated the
- * chapter, where the agent already stored the scenes, the cast and the
- * locations; here the sample chapter ships one by hand. Either way the pipeline
- * only sees the shape.
+ * Deliberately a plain data shape, not a constant baked into the pipeline. It
+ * can come straight out of the script that generated the chapter, with its
+ * scenes, cast and locations, or be written by hand, as the sample chapter is.
+ * Either way the pipeline only sees the shape.
  *
  * It matters more than it looks. Asked to compare two crops with no story
  * around them, a multimodal model answers as a forensic examiner and says two
@@ -50,12 +49,12 @@ export function storySummary(chapter: Chapter): string {
 }
 
 /**
- * The sample chapter, published on Token Comic in August 2026.
+ * The sample chapter.
  *
  * Note what the script asked the illustrator for: in the panels where the
  * report appears, its content is explicitly "obscured" and "without being
- * readable". That is not a rendering accident — a Token Comic chapter shows you
- * that the object exists and withholds what it says, and collecting it is what
+ * readable". That is not a rendering accident — the chapter shows you that the
+ * object exists and withholds what it says, and collecting it is what
  * opens it. This pipeline reveals what the script deliberately hid.
  */
 export const SAMPLE_CHAPTER: Chapter = {

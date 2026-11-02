@@ -26,8 +26,8 @@ import {
  * Muse Image takes sizes as WxH and rounds to the nearest size it supports
  * (1080x1920 comes back as 1152x2048, still 9:16).
  *
- * Every panel is the same vertical 9:16. Token Comic lets a creator mix layouts
- * on a page; this demo does not, on purpose: a vertical strip reads on a phone,
+ * Every panel is the same vertical 9:16. A comic page could mix layouts; this
+ * demo does not, on purpose: a vertical strip reads on a phone,
  * is already the shape of a Reel or a Story, and gives SAM a clip with no
  * letterboxing to undo.
  */

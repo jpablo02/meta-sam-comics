@@ -1,8 +1,8 @@
 /**
  * How to ask an image model for a comic that holds together.
  *
- * Ported from Token Comic (tokencomic.us), where every rule below was paid for
- * with a round of real chapters coming back wrong. The short version of what
+ * Every rule below was paid for with a round of real chapters coming back
+ * wrong. The short version of what
  * those rounds taught:
  *
  *  - Text alone never holds a face across independent generations. Each

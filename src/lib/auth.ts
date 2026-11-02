@@ -1,7 +1,7 @@
 /**
  * Sign-in: Facebook first, Google optional.
  *
- * Same shape as Token Comic: NextAuth with JWT sessions and no account table —
+ * NextAuth with JWT sessions and no account table —
  * the provider is the identity, and the comics a user makes are stored against
  * the provider's stable id. Nothing about the user is kept beyond what the
  * session needs (id, name, picture).
