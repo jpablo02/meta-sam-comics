@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { APP_NAME } from "@/lib/brand";
+import { APP_NAME, gemTitle } from "@/lib/brand";
 import { isGuest } from "@/lib/auth";
 import { currentUser } from "@/lib/session";
 import { collectedCount, findCollection, getComic, getStatus } from "@/lib/store";
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       url: siteUrl() + comicPath(comic.id),
       siteName: APP_NAME,
       type: "article",
-      images: [{ url: image, width: 1080, height: 1620, alt: `${comic.gem.name}, its contents hidden` }],
+      images: [{ url: image, width: 1080, height: 1620, alt: `${gemTitle(comic.gem.name)}, its contents hidden` }],
     },
     // X shows a large picture only when asked to.
     twitter: {
@@ -125,7 +125,7 @@ export default async function ComicPage({ params }: Params) {
 
         <GemCard
           comicId={comic.id}
-          gemName={comic.gem.name}
+          gemName={gemTitle(comic.gem.name)}
           teaserSrc={fileUrl(comic.id, comic.gem.teaser, 1080)}
           revealedSrc={fileUrl(comic.id, comic.gem.revealed, 1080)}
           backdropSrc={fileUrl(comic.id, comic.gem.teaser, 360)}

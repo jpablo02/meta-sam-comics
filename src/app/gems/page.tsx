@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { gemTitle } from "@/lib/brand";
 import { currentUser } from "@/lib/session";
 import { collectionsOf, getComic } from "@/lib/store";
 import { comicPath, fileUrl } from "@/lib/urls";
@@ -18,7 +19,7 @@ export default async function GemsPage() {
   ).filter((x) => x.comic !== null);
   const gems: ShelfGem[] = items.map(({ c, comic }) => ({
     comicId: c.comicId,
-    name: comic!.gem.name,
+    name: gemTitle(comic!.gem.name),
     number: c.number,
     supply: comic!.gem.supply,
     collectedAt: c.at,

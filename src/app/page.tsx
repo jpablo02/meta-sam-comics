@@ -1,4 +1,5 @@
 import { availableProviders, isGuest } from "@/lib/auth";
+import { gemTitle } from "@/lib/brand";
 import { currentUser } from "@/lib/session";
 import { collectedCount, listComics } from "@/lib/store";
 import { comicPath, fileUrl } from "@/lib/urls";
@@ -41,7 +42,7 @@ export default async function Home() {
   }));
   const newGems = comics.slice(0, 9).map((c) => ({
     comicId: c.id,
-    name: c.gem.name,
+    name: gemTitle(c.gem.name),
     teaser: fileUrl(c.id, c.gem.teaser, 360),
     teaserLarge: fileUrl(c.id, c.gem.teaser, 1080),
     seriesTitle: c.seriesTitle,
