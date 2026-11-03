@@ -4,7 +4,7 @@ import type { Author } from "@/lib/store";
 import { AccountMenu } from "./AccountMenu";
 import { HomeIcon } from "./ui";
 
-/** Both doors are always in reach: read and collect, or make your own. */
+/** Make is always one tap away; what is yours — your comics, your gems — lives under your photo. */
 export function TopBar({ user, wide = false }: { user: Author | null; wide?: boolean }) {
   return (
     <header className="topbar">
@@ -24,9 +24,6 @@ export function TopBar({ user, wide = false }: { user: Author | null; wide?: boo
             <Link href="/create" className="button small topbar-create" aria-label="Create a comic">
               <span aria-hidden="true">+</span>
               <span className="topbar-create-label">Create</span>
-            </Link>
-            <Link href="/gems" className="button secondary small">
-              My collection
             </Link>
             <AccountMenu name={user.name} image={user.image} />
           </nav>

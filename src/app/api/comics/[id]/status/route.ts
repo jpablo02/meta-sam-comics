@@ -15,7 +15,7 @@ import { PANEL_COUNT } from "@/lib/writeScript";
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const status = await getStatus(id).catch(() => null);
-  if (!status) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!status || status.state === "deleted") return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // The worker records what it has uploaded; a local run is read off the disk.
   let drawn = status.drawn;

@@ -69,3 +69,10 @@ export async function putFile(id: string, name: string, path: string): Promise<v
   const type = name.endsWith(".mp4") ? "video/mp4" : name.endsWith(".webp") ? "image/webp" : "image/png";
   await writeBlob(id, name, await readFile(path), type);
 }
+
+/** Remove every file of a deleted comic. On local disk the store already removed its folder. */
+export async function deleteBlobs(id: string): Promise<void> {
+  if (!/^[a-z0-9-]+$/.test(id)) throw new Error(`bad comic id: ${id}`);
+  if (!BUCKET) return;
+  await gcs().bucket(BUCKET).deleteFiles({ prefix: `comics/${id}/` });
+}

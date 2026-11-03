@@ -14,7 +14,7 @@
  *
  * The demo comic ships in demo/<id>/ with the same layout, read-only.
  */
-import { mkdir, readFile, readdir, writeFile, rename } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile, rename, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { Step } from "./pipeline";
@@ -65,7 +65,8 @@ export interface ComicStatus {
   id: string;
   author: Author;
   createdAt: string;
-  state: "running" | "done" | "failed";
+  /** "deleted": its author removed it — only this tombstone is left, so it still counts against a guest's limit. */
+  state: "running" | "done" | "failed" | "deleted";
   step: Step;
   detail?: string;
   error?: string;
@@ -202,7 +203,7 @@ export async function unfinishedBy(authorId: string): Promise<ComicStatus[]> {
     const root = join(DATA_DIR, "comics");
     if (!existsSync(root)) return [];
     const all = await Promise.all((await readdir(root)).map((id) => readJson<ComicStatus>(join(root, id, "status.json"))));
-    statuses = all.filter((s): s is ComicStatus => s?.author.id === authorId && s.state !== "done");
+    statuses = all.filter((s): s is ComicStatus => s?.author.id === authorId && (s.state === "running" || s.state === "failed"));
   }
   return statuses
     .filter((s) =>
@@ -245,6 +246,70 @@ export async function listComics(): Promise<StoredComic[]> {
   return comics
     .filter((c): c is StoredComic => c !== null)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+/** The finished comics this author made, newest first. */
+export async function comicsBy(authorId: string): Promise<StoredComic[]> {
+  const sql = await db();
+  if (sql) {
+    const { rows } = await sql.query(
+      "SELECT data FROM comics WHERE data->'author'->>'id' = $1 ORDER BY created_at DESC",
+      [authorId],
+    );
+    return rows.map((r) => r.data as StoredComic);
+  }
+  return (await listComics()).filter((c) => c.author.id === authorId);
+}
+
+/**
+ * Delete a comic for good: the comic, every collected copy of its gem, and the
+ * idea it was made from. What stays is a tombstone in its status — no idea, no
+ * name — so a deleted comic still counts against a guest's limit and its page
+ * says "not found" instead of showing a progress view. Its files are removed by
+ * the caller (./blobs.ts).
+ *
+ * Today collecting is free, so deleting takes the collectors' copies with it.
+ * Once a gem can be bought, a comic with buyers will be hidden from the public
+ * instead, and its collectors will keep it — see docs/ROADMAP.md.
+ */
+export async function deleteComic(comic: StoredComic): Promise<void> {
+  const tombstone: ComicStatus = {
+    id: comic.id,
+    author: { id: comic.author.id, name: "" },
+    createdAt: comic.createdAt,
+    state: "deleted",
+    step: "done",
+    updatedAt: new Date().toISOString(),
+  };
+  const sql = await db();
+  if (sql) {
+    const client = await sql.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("DELETE FROM collections WHERE comic_id = $1", [comic.id]);
+      await client.query("DELETE FROM comics WHERE id = $1", [comic.id]);
+      await client.query(
+        "INSERT INTO statuses (id, data) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET data = $2, updated_at = now()",
+        [comic.id, tombstone],
+      );
+      await client.query("COMMIT");
+    } catch (e) {
+      await client.query("ROLLBACK").catch(() => {});
+      throw e;
+    } finally {
+      client.release();
+    }
+    return;
+  }
+  // The demo ships read-only in demo/; only comics made here can go.
+  const dir = join(DATA_DIR, "comics", comic.id);
+  if (!existsSync(join(dir, "comic.json"))) throw new Error(`not a local comic: ${comic.id}`);
+  await exclusive(async () => {
+    await writeJson(COLLECTIONS, (await readCollections()).filter((c) => c.comicId !== comic.id));
+  });
+  await rm(dir, { recursive: true, force: true });
+  await mkdir(dir, { recursive: true });
+  await writeJson(join(dir, "status.json"), tombstone);
 }
 
 // ── Collections ─────────────────────────────────────────────────────────────

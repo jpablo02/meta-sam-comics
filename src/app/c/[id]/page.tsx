@@ -54,7 +54,8 @@ export default async function ComicPage({ params }: Params) {
 
   if (!comic) {
     const status = /^[a-z0-9-]+$/.test(id) ? await getStatus(id).catch(() => null) : null;
-    if (!status) notFound();
+    // A deleted comic leaves only a tombstone behind.
+    if (!status || status.state === "deleted") notFound();
     return (
       <>
         <TopBar user={user} />

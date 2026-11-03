@@ -105,7 +105,8 @@ shaped, in the comments of [`src/lib`](src/lib).
 Every gem has 100 numbered copies, given out in the order people collect them. Comics appear in a
 shared feed. Signed in with Facebook, you can post a comic's link — its preview is the cover — and
 anyone can share it as a video, ready for Reels, Stories or WhatsApp, from the phone's own share
-sheet.
+sheet. Under your picture, **My comics** lists what you made — and deletes any of it, files and all —
+and **My collection** holds every gem you collected.
 
 ## Architecture
 

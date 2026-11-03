@@ -97,6 +97,16 @@ Done on `feat/polish-round-1`:
 - [ ] **Facebook payments** for apps exist only for Instant Games (up to 30%
       fee); a web app like Tales would charge with its own processor.
 
+## Round 4 — done on `feat/my-comics` (Nov 3)
+
+- [x] **My comics.** Under the profile picture: My comics and My collection.
+      The top bar keeps only Create.
+- [x] **Delete a comic.** Its author can delete it from My comics: the comic,
+      its files, its idea and every collected copy of its gem. A tombstone
+      stays, so a deleted comic still counts against a guest's limit.
+- [ ] **Later, with paid gems:** hide a comic with buyers instead of deleting
+      it; buyers keep access (see ROADMAP).
+
 ## Decided
 
 - [x] **Architecture** — Vercel (web) + Cloud Run Job (pipeline) + Cloud

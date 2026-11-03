@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "./ui";
 
-/** The avatar in the top bar: who is signed in, and the way out. */
+/** The avatar in the top bar: who is signed in, what is theirs, and the way out. */
 export function AccountMenu({ name, image }: { name: string; image?: string | null }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -36,6 +37,12 @@ export function AccountMenu({ name, image }: { name: string; image?: string | nu
       {open && (
         <div className="account-menu" role="menu">
           <span className="account-name" translate="no">{name}</span>
+          <Link href="/my-comics" role="menuitem" className="account-item" onClick={() => setOpen(false)}>
+            My comics
+          </Link>
+          <Link href="/gems" role="menuitem" className="account-item" onClick={() => setOpen(false)}>
+            My collection
+          </Link>
           <button type="button" role="menuitem" className="account-item" onClick={() => signOut({ callbackUrl: "/" })}>
             Sign out
           </button>

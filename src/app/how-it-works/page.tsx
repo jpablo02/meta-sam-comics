@@ -252,6 +252,10 @@ export default function HowItWorks() {
             share the comic as a video, ready for Reels, Stories or WhatsApp. Friends who collect the gem get their
             numbered copy, and the text only they can read.
           </p>
+          <p>
+            What is yours lives under your picture: <strong>My comics</strong>, where you can delete any comic you
+            made, and <strong>My collection</strong>, every gem you hold.
+          </p>
         </Step>
 
         <section className="how-models">

@@ -8,7 +8,7 @@ import { Brand } from "@/components/NoTranslate";
  * an app can go Live. Instructions are enough for an app that stores no data
  * Facebook would need to be told about.
  */
-export const metadata = { title: `Data deletion — $<Brand />` };
+export const metadata = { title: `Data deletion — ${APP_NAME}` };
 
 export default async function DataDeletion() {
   const user = await currentUser();
@@ -16,12 +16,19 @@ export default async function DataDeletion() {
   // the repo never carries a personal one.
   const contact = process.env.CONTACT_EMAIL;
   return (
-    <LegalPage user={user} title="Delete your data" updated="October 31, 2026">
+    <LegalPage user={user} title="Delete your data" updated="November 3, 2026">
       <p className="legal-lead">
         You can have your account and everything you made with <Brand /> deleted at any time.
       </p>
 
-      <h2>How to ask</h2>
+      <h2>Delete a comic yourself</h2>
+      <p>
+        Open <strong>My comics</strong> from the menu under your picture and press Delete under any comic you
+        made. The comic, its images and video, the idea it was made from and every collected copy of its gem
+        are removed at once.
+      </p>
+
+      <h2>Delete everything</h2>
       <ol>
         <li>
           Email{" "}
@@ -38,7 +45,7 @@ export default async function DataDeletion() {
 
       <h2>What is deleted</h2>
       <ul>
-        <li>Your account: name, picture, email and provider id.</li>
+        <li>Your account: name, picture and provider id.</li>
         <li>Your ideas, and the comics, images and videos made from them.</li>
         <li>The gems you collected.</li>
       </ul>

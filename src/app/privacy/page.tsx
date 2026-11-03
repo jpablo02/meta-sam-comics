@@ -8,12 +8,12 @@ import { Brand } from "@/components/NoTranslate";
  * Facebook Login requires a public privacy policy URL before an app can go
  * Live. This states what the app actually does — keep it in step with the code.
  */
-export const metadata = { title: `Privacy — $<Brand />` };
+export const metadata = { title: `Privacy — ${APP_NAME}` };
 
 export default async function Privacy() {
   const user = await currentUser();
   return (
-    <LegalPage user={user} title="Privacy" updated="October 31, 2026">
+    <LegalPage user={user} title="Privacy" updated="November 3, 2026">
       <p className="legal-lead">
         <Brand /> turns a story idea you write into a comic. This page explains what we receive, what we keep
         and who can see it.
@@ -21,9 +21,9 @@ export default async function Privacy() {
 
       <h2>When you sign in</h2>
       <p>
-        With Facebook we receive your name, profile picture and email address, and an id that identifies
-        your account. We do not ask to post on your behalf, read your friends or
-        access your messages.
+        With Facebook we receive your name, your profile picture and an id that identifies your account —
+        nothing else, not even your email. We do not ask to post on your behalf, read your friends or access
+        your messages.
       </p>
       <p>
         As a guest we receive nothing about you. Your browser keeps a random guest id so you can come back to
@@ -41,7 +41,7 @@ export default async function Privacy() {
       <h2>Who can see it</h2>
       <p>
         Comics are made to be read: each one appears in the <Brand /> feed with its author&apos;s name and
-        picture, and other readers can read it and collect its gem. Your email is never shown.
+        picture, and other readers can read it and collect its gem.
       </p>
 
       <h2>How a comic is made</h2>
@@ -59,7 +59,8 @@ export default async function Privacy() {
 
       <h2>Deleting your data</h2>
       <p>
-        You can ask for everything to be deleted at any time — see <Link href="/data-deletion">data deletion</Link>.
+        You can delete any comic you made yourself, from <strong>My comics</strong> in the menu under your
+        picture. To have everything deleted, see <Link href="/data-deletion">data deletion</Link>.
       </p>
     </LegalPage>
   );

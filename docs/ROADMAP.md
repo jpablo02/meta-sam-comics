@@ -39,6 +39,10 @@ approach.
   people collect them (#37 of 100). Each copy is numbered inside a transaction
   that locks the comic's row, so two people can never get the same number or
   the 101st copy.
+- **Hide instead of delete, once gems are paid for.** Today an author can
+  delete a comic, and the free copies of its gem go with it. When a gem can be
+  bought, a comic with buyers will be hidden from the public instead, and the
+  people who bought its gem will keep reading it.
 - **Creator earnings.** Collecting stays free. A paid golden edition of each
   gem shares what it earns with the comic's creator, and creation credits cover
   what a comic costs to draw. Details in [BACKLOG](BACKLOG.md#monetization-later--collecting-stays-free-for-the-demo).

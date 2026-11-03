@@ -158,6 +158,32 @@ img, video { max-width: 100%; display: block; }
 .button.ghost { background: none; color: var(--muted); }
 .button.block { width: 100%; }
 .button.small { min-height: 36px; padding: 6px 12px; font-size: 14px; }
+.button.danger { background: var(--danger); color: #fff; }
+
+/* My comics: covers in a grid, each one deletable. */
+.my-comics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+@media (min-width: 560px) { .my-comics-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.my-comic { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.my-comic-cover { display: block; border-radius: 10px; overflow: hidden; background: var(--surface-2); aspect-ratio: 2 / 3; }
+.my-comic-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.25s; }
+.my-comic-cover:hover img, .my-comic-cover:focus-visible img { transform: scale(1.03); }
+.my-comic-title { font-size: 15px; line-height: 1.25; overflow-wrap: anywhere; }
+.my-comic-delete {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--danger);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.my-comic-delete:hover, .my-comic-delete:focus-visible { text-decoration: underline; }
+.my-comic-confirm { margin-top: 4px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); font-size: 14px; }
+.my-comic-confirm p { margin: 0 0 8px; }
+.my-comic-confirm-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.my-comics-error { margin: 0 0 12px; color: var(--danger); }
 
 .avatar {
   flex: none;
@@ -1202,6 +1228,7 @@ img, video { max-width: 100%; display: block; }
   cursor: pointer;
 }
 .account-item:hover, .account-item:focus-visible { background: var(--surface-2); }
+a.account-item { text-decoration: none; }
 
 /* ── Home: arrows on the hero and on the rows ───────────────────────── */
 
