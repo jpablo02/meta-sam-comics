@@ -146,8 +146,9 @@ inside.
 > panels, to show where this is going. The product itself makes comics, and every screen recording
 > in the video is Tales running in production.
 
-Also on the way: longer chapters and series that inherit their cast, more art styles, creators
-earning from the gems readers collect, and reels published from a Tales Page. Creation already
+Also on the way: longer chapters and series that inherit their cast, more art styles, a paid
+golden edition of each gem that shares its earnings with the creator (collecting stays free),
+creation credits, and reels published from a Tales Page. Creation already
 scales out — each comic runs as its own Cloud Run Job execution. The full list, with the limits we
 measured, is in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
