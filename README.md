@@ -133,6 +133,24 @@ brings you back; if a run fails, the reader is told why in plain words and can t
 | [`src/lib/revealObject.ts`](src/lib/revealObject.ts) | The gem's two cards |
 | [`scripts/worker.ts`](scripts/worker.ts) | The Cloud Run Job entry point |
 
+## Where Tales goes next
+
+**From comics to animated episodes.** Tales makes comics today. What animation needs most is
+already built: every character, every place and the gem are drawn once as references, and every
+panel is drawn from them, so nothing drifts from one picture to the next — the same consistency an
+animated episode depends on. When Meta's Model API offers video generation, a Tales story becomes a
+short animated episode, anime-style, drawn from those same references, with the gem still hidden
+inside.
+
+> **About our demo video.** Its animated shots were made in CapCut (image-to-video) from Tales' own
+> panels, to show where this is going. The product itself makes comics, and every screen recording
+> in the video is Tales running in production.
+
+Also on the way: longer chapters and series that inherit their cast, more art styles, creators
+earning from the gems readers collect, and reels published from a Tales Page. Creation already
+scales out — each comic runs as its own Cloud Run Job execution. The full list, with the limits we
+measured, is in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
 ## Run it locally
 
 Requires Node 22 and a [Meta Model API](https://dev.meta.ai/) key.

@@ -7,6 +7,14 @@ automatically. Each of those is a choice made to ship a complete loop — idea �
 comic → hidden object → collected → shared — in ten days, not a limit of the
 approach.
 
+## Motion
+
+- **Comics to animated episodes.** Today Tales makes comics. Every character,
+  place and gem is drawn once as a reference and each panel is drawn from those
+  references — the consistency an animated episode needs. When Meta's Model API
+  offers video generation, a story becomes a short animated, anime-style episode
+  made from the same references, the gem still hidden inside it.
+
 ## Creation
 
 - **More art styles.** The pipeline takes the style as one string; the demo
@@ -27,10 +35,10 @@ approach.
 
 ## Collecting
 
-- **Scarcity.** Each object has a fixed number of copies (for example 100),
-  numbered in the order people collect them (#37 of 100), with a live counter.
-  The count is enforced by the database with one atomic update, so two people
-  can never get the last copy.
+- **Scarcity — already in.** Each gem has 100 copies, numbered in the order
+  people collect them (#37 of 100). Each copy is numbered inside a transaction
+  that locks the comic's row, so two people can never get the same number or
+  the 101st copy.
 - **Creator earnings.** A share of each collection goes to the comic's creator.
 
 ## Distribution
