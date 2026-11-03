@@ -33,6 +33,26 @@ const SURPRISES = [
   },
 ];
 
+/** Where Tales goes after the hackathon. Animation first: the references it needs already exist. */
+const NEXT = [
+  {
+    title: "Comics become animated episodes",
+    body: "Every character, place and gem is already drawn once as a reference, and every panel is drawn from them — the consistency animation depends on. When Meta's Model API offers video, a story becomes a short anime-style episode, the gem still hidden inside.",
+  },
+  {
+    title: "Series",
+    body: "Chapter 2 keeps the cast, the places and the style of chapter 1 — and the words hidden in a gem can start the next chapter.",
+  },
+  {
+    title: "Reels from a Tales Page",
+    body: "Every comic already comes with a vertical reel. A Tales Facebook Page will publish the best ones as Reels.",
+  },
+  {
+    title: "Creators earn",
+    body: "Collecting stays free. A paid golden edition of each gem will share what it earns with the person who imagined the story.",
+  },
+];
+
 const MODELS = [
   {
     name: "Muse Spark",
@@ -259,6 +279,22 @@ export default function HowItWorks() {
               <div key={s.title} className="how-model">
                 <strong>{keepNames(s.title)}</strong>
                 <span>{keepNames(s.body)}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="how-models">
+          <h2>Where Tales goes next</h2>
+          <p className="how-models-lead">
+            Today Tales makes comics. The animated opening of our demo video was made in CapCut from Tales&apos; own
+            panels — a preview of where this is going.
+          </p>
+          <div className="how-models-grid">
+            {NEXT.map((n) => (
+              <div key={n.title} className="how-model">
+                <strong>{n.title}</strong>
+                <span>{keepNames(n.body)}</span>
               </div>
             ))}
           </div>

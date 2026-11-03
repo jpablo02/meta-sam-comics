@@ -18,8 +18,10 @@ Under **Facebook Login → Settings**:
   - `https://<production-domain>/api/auth/callback/facebook` (once deployed)
 - Client OAuth login: **on**. Web OAuth login: **on**.
 
-Permissions requested by the app: `public_profile` and `email` only. Both are
-standard access — no App Review needed.
+Permission requested by the app: `public_profile` only — the name and photo a
+comic and a collection need. Asking for `email` too would add a data-handling
+review. Tales went Live after business verification and an App Review of
+`public_profile` (approved Nov 2, 2026).
 
 ## 3. Copy the credentials
 
@@ -48,5 +50,5 @@ real address.
 Facebook retired `publish_actions` in August 2018: apps can no longer post to a
 person's personal timeline on their behalf. Sharing goes through Facebook's own
 **Share Dialog**, where the person confirms the post. That is what this app
-uses — it shares the comic's public page, whose preview image is the
-collectible card.
+uses — it shares the comic's public page, whose preview image is the comic's
+cover. The video itself is shared through the phone's share sheet.

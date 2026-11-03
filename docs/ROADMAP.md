@@ -43,8 +43,10 @@ approach.
 
 ## Distribution
 
-- **Instagram and Reels.** The pipeline already outputs a vertical reel with a
-  spotlight on the object; publishing it as a Reel is the natural next channel.
+- **Reels from a Tales Page.** Every comic already comes with a vertical reel,
+  and "Share video" hands it to the phone's share sheet (Reels, Stories,
+  WhatsApp). Meta's Reels publishing API posts to Pages, not personal profiles,
+  so the next step is a Tales Facebook Page that publishes the best comics.
 - **More languages.** Ideas can already be written in any language. Output is
   English for now; the script and the object text can be generated in the
   reader's language.

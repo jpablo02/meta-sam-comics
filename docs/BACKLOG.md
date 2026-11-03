@@ -26,8 +26,6 @@ Done on `feat/polish-round-1`:
       words for a narrow surface (blade, ring, key, watch lid), more for a page.
       To verify on the next real run.
 
-## Next
-
 ## Round 2 — done on `feat/gem-sheet`
 
 - [x] **Gem object sheet.** The gem is drawn once (shape, materials, real size
@@ -71,15 +69,20 @@ Done on `feat/polish-round-1`:
 - [ ] Check the gem sheet and the engraving on other stories.
 - [ ] More UX passes from the owner's testing.
 
-## Scaling plan (for the submission, not built for the demo)
+## Scaling
 
+- [x] **One Cloud Run Job execution per comic**, so comics are made in parallel
+      and a slow one never blocks the web.
+- [x] **Numbering holds with many servers.** Each copy of a gem is numbered in a
+      Postgres transaction that locks the comic's row.
+- [x] **Files on Cloud Storage.** Each resized copy is made once, on first
+      request, and kept next to the original.
+- [ ] **A CDN in front of the files.**
 - [ ] **Redraw a panel.** The author can ask for one panel again (or its
       bubbles) when it came out wrong, keeping the cast and gem references.
-- [ ] **Collect is one atomic UPDATE** in Postgres (today: a queue in one
-      process), so numbering holds with many servers.
-- [ ] **One Cloud Run Job execution per comic**, so comics are made in parallel
-      and a slow one never blocks the web.
-- [ ] **Files on Cloud Storage behind a CDN**, resized once at upload.
+      Today a failed comic can be tried again as a whole.
+- [ ] **Animated episodes** once Meta's Model API offers video — see
+      [ROADMAP](ROADMAP.md#motion).
 
 ### Monetization (later — collecting stays free for the demo)
 
@@ -94,24 +97,24 @@ Done on `feat/polish-round-1`:
 - [ ] **Facebook payments** for apps exist only for Instant Games (up to 30%
       fee); a web app like Tales would charge with its own processor.
 
-## Waiting on a decision
+## Decided
 
-- [ ] **Architecture** — owner leans to Google Cloud + Vercel + the domain
-      already owned; Railway is out. Recommendation in the next
-      section of the chat: Vercel (web) + Cloud Run Job (pipeline) + Cloud
-      Storage (files) + Postgres (comics, collections). Check the contest rules
-      on Google services first.
-- [ ] **Phone testing** — after the deploy, not with temporary tunnels (owner's call).
-- [ ] **Database** for comics and collections (the local `data/` folder is the
-      demo store; `store.ts` is the only file that changes).
-- [ ] **Facebook app Live mode**: privacy URL, data-deletion URL, 1024×1024
-      icon, category — all need the public domain. Business verification is
-      required to publish; check whether it can be done as an individual.
-      Fallback: judges try it in development mode as testers, or a guest path.
+- [x] **Architecture** — Vercel (web) + Cloud Run Job (pipeline) + Cloud
+      Storage (files) + Cloud SQL Postgres (comics, progress, collections), on
+      tales.pablodrum.xyz.
+- [x] **Database** — Cloud SQL Postgres in production; the local `data/` folder
+      remains the store for a fresh clone. `store.ts` is the only file that
+      knows the difference.
+- [x] **Phone testing** — done in production.
+- [x] **Facebook app Live** — business verified and `public_profile` approved
+      by Meta (Nov 2). Guests can still try everything but posting to Facebook.
+
+Later rounds (guest mode, home shelves, progress bubbles, retries, sharing) are
+in the git history.
 
 ## Submission
 
-- [ ] README (artistic, hero image).
+- [x] README (artistic, hero image).
 - [ ] Demo video (Nov 3).
 - [ ] X post for Most Viral, link in the form (before Nov 4).
 - [ ] Submit early on Nov 4.

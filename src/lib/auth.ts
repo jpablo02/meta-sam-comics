@@ -13,10 +13,8 @@
  * clone runs with whatever the developer has set up.
  *
  * Guests: a session with no account behind it, so anyone can try Tales without
- * Facebook — the app stays in Development mode until Meta verifies it, and in
- * that mode Facebook lets in only the app's own team. A guest can read, collect
- * and make a few comics, but cannot share to Facebook: there is no Facebook
- * identity to share as.
+ * Facebook. A guest can read, collect and make a few comics, but cannot post to
+ * Facebook: there is no Facebook identity to post as.
  */
 import { randomBytes } from "node:crypto";
 import type { NextAuthOptions } from "next-auth";
