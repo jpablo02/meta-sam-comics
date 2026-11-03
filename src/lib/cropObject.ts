@@ -1,11 +1,11 @@
 /**
- * Cut the tracked object out of the panel it was found in.
+ * Cut the gem out of the panel it was found in.
  *
- * SAM measures its boxes against the CLIP canvas, not against the panel. The
- * clip letterboxes each panel onto a square, so a box has to be mapped back
- * through that transform before it means anything on the original art —
- * otherwise the crop lands off the object on every panel that was not already
- * square.
+ * SAM measures its boxes against the canvas it reports (w, h), not necessarily
+ * against the panel. When that canvas is a letterboxed square — as it was when
+ * whole chapters went to SAM as one video — a box has to be mapped back through
+ * the letterbox before it means anything on the original art. For a panel sent
+ * on its own the canvas is the panel, and the mapping is the identity.
  */
 import sharp from "sharp";
 import type { PanelAppearance } from "./trackObject";

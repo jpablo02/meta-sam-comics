@@ -6,7 +6,6 @@
  */
 export const APP_NAME = "Tales";
 export const APP_TAGLINE = "Every story hides a gem.";
-export const COLLECTIBLE_NAME = "Gem";
 
 const SMALL_WORDS = new Set(["a", "an", "and", "at", "by", "for", "from", "in", "inside", "of", "on", "or", "the", "to", "with"]);
 
