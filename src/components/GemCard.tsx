@@ -124,7 +124,7 @@ export function GemCard(props: Props) {
           </>
         ) : (
           <button type="button" className="gem-cta" onClick={collect} disabled={busy || soldOut}>
-            {soldOut ? "All copies collected" : busy ? "Collecting…" : "Collect this Gem"}
+            {soldOut ? "All copies collected" : busy ? "Collecting…" : "Collect this gem"}
           </button>
         )}
 

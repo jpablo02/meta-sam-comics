@@ -1,7 +1,7 @@
-import { availableProviders, isGuest } from "@/lib/auth";
+import { availableProviders } from "@/lib/auth";
 import { gemTitle } from "@/lib/brand";
 import { currentUser } from "@/lib/session";
-import { collectedCount, listComics } from "@/lib/store";
+import { collectedCounts, listComics } from "@/lib/store";
 import { comicPath, fileUrl } from "@/lib/urls";
 import { ComicCover } from "@/components/ComicCover";
 import { HeroCarousel } from "@/components/HeroCarousel";
@@ -24,8 +24,8 @@ export default async function Home() {
     return <Landing providers={availableProviders()} exampleId={example?.id} />;
   }
 
-  const counts = await Promise.all(comics.map((c) => collectedCount(c.id)));
-  const collected = new Map(comics.map((c, i) => [c.id, counts[i]]));
+  const counts = await collectedCounts();
+  const collected = new Map(comics.map((c) => [c.id, counts.get(c.id) ?? 0]));
 
   // listComics is newest first, and sort is stable: ties stay newest first.
   const mostCollected = [...comics].sort((a, b) => collected.get(b.id)! - collected.get(a.id)!);
@@ -33,7 +33,8 @@ export default async function Home() {
   // Too few new ones makes a thin row: then it is simply the latest.
   const fresh = thisWeek.length >= 4 ? thisWeek : comics;
 
-  const slides = mostCollected.map((c) => ({
+  // Ten turns are enough for a carousel; a dot per comic would not fit a phone.
+  const slides = mostCollected.slice(0, 10).map((c) => ({
     href: comicPath(c.id),
     cover: fileUrl(c.id, c.cover ?? c.panels[0], 1080),
     series: c.seriesTitle,
@@ -66,7 +67,7 @@ export default async function Home() {
           <NewThisWeek comics={fresh.slice(0, 12)} title={fresh === thisWeek ? "New this week" : "Latest stories"} />
 
           {comics.map((c) => (
-            <ComicCover key={c.id} comic={c} collected={collected.get(c.id)!} canShare={!isGuest(user.id)} />
+            <ComicCover key={c.id} comic={c} collected={collected.get(c.id)!} />
           ))}
 
           <div className="footer-links">

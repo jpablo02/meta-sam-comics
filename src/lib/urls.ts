@@ -15,7 +15,7 @@ export function fileUrl(id: string, name: string, width?: 360 | 720 | 1080): str
 /**
  * Facebook's share dialog. It needs no permission and no App Review: the reader
  * shares the public comic page, and Facebook reads its preview from the page's
- * Open Graph tags (the gem's teaser card).
+ * Open Graph tags (the comic's cover).
  */
 export function facebookShareUrl(id: string): string {
   return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(siteUrl() + comicPath(id))}`;

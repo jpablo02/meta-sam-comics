@@ -409,6 +409,18 @@ export async function collectedCount(comicId: string): Promise<number> {
   return (await readCollections()).filter((c) => c.comicId === comicId).length;
 }
 
+/** How many copies of each gem have been collected, in one read — the home page needs them all. */
+export async function collectedCounts(): Promise<Map<string, number>> {
+  const sql = await db();
+  if (sql) {
+    const { rows } = await sql.query("SELECT comic_id, count(*)::int AS n FROM collections GROUP BY comic_id");
+    return new Map(rows.map((r) => [r.comic_id as string, r.n as number]));
+  }
+  const counts = new Map<string, number>();
+  for (const c of await readCollections()) counts.set(c.comicId, (counts.get(c.comicId) ?? 0) + 1);
+  return counts;
+}
+
 export async function findCollection(comicId: string, userId: string): Promise<Collection | null> {
   const sql = await db();
   if (sql) {

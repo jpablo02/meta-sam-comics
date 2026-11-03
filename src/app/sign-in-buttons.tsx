@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn, signOut } from "next-auth/react";
+import { GUEST_COMICS } from "@/lib/ideaRules";
 
 const GUEST_KEY = "tales.guestId";
 
@@ -38,7 +39,9 @@ export function SignInButtons({ providers }: { providers: Array<"facebook" | "go
       <button type="button" className="button block guest" onClick={() => signInAsGuest("/")}>
         Try it as a guest
       </button>
-      <p className="guest-note">As a guest you can make 2 comics, but you can&apos;t share them on Facebook.</p>
+      <p className="guest-note">
+        As a guest you can make {GUEST_COMICS} comics and share their videos, but you can&apos;t post links to Facebook.
+      </p>
     </>
   );
 }

@@ -5,5 +5,5 @@
  */
 export const MIN_IDEA = 5;
 
-/** Each comic costs real model calls, and anyone can be a guest. Failed comics do not count. */
+/** Each comic costs real model calls, and anyone can be a guest. Failed comics do not count; deleted ones do. */
 export const GUEST_COMICS = 2;
